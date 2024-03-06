@@ -1,0 +1,7 @@
+{
+    "projectName": "RedOrBlack.Contracts",
+    "namespace": "RedOrBlack.Contracts",
+    "lang": 0,
+    "autoCodeGen": true,
+    "projectPath": "./"
+}

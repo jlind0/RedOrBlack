@@ -1,0 +1,4 @@
+{
+    "solidity.defaultCompiler": "localFile",
+    "solidity.compileUsingLocalVersion": "C:\\Users\\user\\source\\repos\\RedOrBlack\\RedOrBlack.Contracts\\soljson-v0.8.23+commit.f704f362.js"
+}
