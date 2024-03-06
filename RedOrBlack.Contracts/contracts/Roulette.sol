@@ -164,10 +164,23 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
         accountAddresses.push(msg.sender);
         accounts[msg.sender] = Account(msg.sender, nick, msg.value);
     }
+    function getAccount() public view returns(Account memory){
+        if(accounts[msg.sender].owner != msg.sender)
+            revert AccountNotFound();
+        return accounts[msg.sender];
+    }
+    function fundAccount() public payable{
+         if(accounts[msg.sender].owner != msg.sender)
+            revert AccountNotFound();
+        Account storage acct = accounts[msg.sender];
+        if(acct.value + msg.value < mindeposit)
+            revert MoreFundsRequired();
+        acct.value += msg.value;
+    }
     function withdraw(uint amount) public nonReentrant payable{
         if(!isOpenForWithdrawl)
             revert IsNotOpenForWithdrawl();
-         if(accounts[msg.sender].owner != msg.sender)
+        if(accounts[msg.sender].owner != msg.sender)
             revert AccountNotFound();
         if(amount > address(this).balance)
             revert InsufficentFunds();
@@ -193,16 +206,6 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
         (bool success, ) = msg.sender.call{value: amount}("");
         if(!success)
             revert TransferFailed();
-    }
-    function getCurrentValue() public view returns(uint){
-        uint i = 0;
-        uint balance = address(this).balance;
-        while(i < accountAddresses.length)
-        {
-            balance -= accounts[accountAddresses[i]].value;
-            i++;
-        }
-        return balance;
     }
     function closeAccount() public nonReentrant payable{
         if(accounts[msg.sender].owner != msg.sender)

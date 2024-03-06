@@ -113,6 +113,36 @@ namespace RedOrBlack.Contracts.Wheel
              return ContractHandler.SendRequestAndWaitForReceiptAsync<FundFunction>(null, cancellationToken);
         }
 
+        public Task<string> FundAccountRequestAsync(FundAccountFunction fundAccountFunction)
+        {
+             return ContractHandler.SendRequestAsync(fundAccountFunction);
+        }
+
+        public Task<string> FundAccountRequestAsync()
+        {
+             return ContractHandler.SendRequestAsync<FundAccountFunction>();
+        }
+
+        public Task<TransactionReceipt> FundAccountRequestAndWaitForReceiptAsync(FundAccountFunction fundAccountFunction, CancellationTokenSource cancellationToken = null)
+        {
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(fundAccountFunction, cancellationToken);
+        }
+
+        public Task<TransactionReceipt> FundAccountRequestAndWaitForReceiptAsync(CancellationTokenSource cancellationToken = null)
+        {
+             return ContractHandler.SendRequestAndWaitForReceiptAsync<FundAccountFunction>(null, cancellationToken);
+        }
+
+        public Task<GetAccountOutputDTO> GetAccountQueryAsync(GetAccountFunction getAccountFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAccountFunction, GetAccountOutputDTO>(getAccountFunction, blockParameter);
+        }
+
+        public Task<GetAccountOutputDTO> GetAccountQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAccountFunction, GetAccountOutputDTO>(null, blockParameter);
+        }
+
         public Task<GetBetsForSpinOutputDTO> GetBetsForSpinQueryAsync(GetBetsForSpinFunction getBetsForSpinFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryDeserializingToObjectAsync<GetBetsForSpinFunction, GetBetsForSpinOutputDTO>(getBetsForSpinFunction, blockParameter);
@@ -134,17 +164,6 @@ namespace RedOrBlack.Contracts.Wheel
         public Task<GetCurrentBetsOutputDTO> GetCurrentBetsQueryAsync(BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryDeserializingToObjectAsync<GetCurrentBetsFunction, GetCurrentBetsOutputDTO>(null, blockParameter);
-        }
-
-        public Task<BigInteger> GetCurrentValueQueryAsync(GetCurrentValueFunction getCurrentValueFunction, BlockParameter blockParameter = null)
-        {
-            return ContractHandler.QueryAsync<GetCurrentValueFunction, BigInteger>(getCurrentValueFunction, blockParameter);
-        }
-
-        
-        public Task<BigInteger> GetCurrentValueQueryAsync(BlockParameter blockParameter = null)
-        {
-            return ContractHandler.QueryAsync<GetCurrentValueFunction, BigInteger>(null, blockParameter);
         }
 
         public Task<bool> IsOpenForWithdrawlQueryAsync(IsOpenForWithdrawlFunction isOpenForWithdrawlFunction, BlockParameter blockParameter = null)
