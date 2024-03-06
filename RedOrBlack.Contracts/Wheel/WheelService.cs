@@ -166,6 +166,16 @@ namespace RedOrBlack.Contracts.Wheel
             return ContractHandler.QueryDeserializingToObjectAsync<GetCurrentBetsFunction, GetCurrentBetsOutputDTO>(null, blockParameter);
         }
 
+        public Task<GetNumbersOutputDTO> GetNumbersQueryAsync(GetNumbersFunction getNumbersFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetNumbersFunction, GetNumbersOutputDTO>(getNumbersFunction, blockParameter);
+        }
+
+        public Task<GetNumbersOutputDTO> GetNumbersQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetNumbersFunction, GetNumbersOutputDTO>(null, blockParameter);
+        }
+
         public Task<bool> IsOpenForWithdrawlQueryAsync(IsOpenForWithdrawlFunction isOpenForWithdrawlFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<IsOpenForWithdrawlFunction, bool>(isOpenForWithdrawlFunction, blockParameter);

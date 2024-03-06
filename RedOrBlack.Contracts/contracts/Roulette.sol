@@ -256,6 +256,14 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     function getBetsForSpin(uint spinId) public view returns(Bet[] memory){
         return spinBets[spinId];
     }
+    function getNumbers() public view returns(Number[] memory ns){
+        ns = new Number[](numberIds.length);
+        uint i = 0;
+        while(i < numberIds.length){
+            ns[i] = numbers[numberIds[i]];
+            i++;
+        }
+    }
     function placeColorBet(NumberColor color, uint amount) public{
         if(color == NumberColor.Green)
             revert InvalidBet();
@@ -427,7 +435,9 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             else if(b.betType == BetType.Dozen && b.byTheDozen == n.whichDozen)
                 winner = true;
             if(winner){
-                accounts[b.account].value += payouts[b.betType] * b.amount;
+                uint payout = payouts[b.betType] * b.amount;
+                accounts[b.account].value += payout;
+                currentBalance -= payout;
             }
             else
                 currentBalance += b.amount; 

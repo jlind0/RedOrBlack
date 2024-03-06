@@ -5,6 +5,10 @@ VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedOrBlack.Contracts", "RedOrBlack.Contracts\RedOrBlack.Contracts.csproj", "{63A772B7-0283-4439-8B88-05CB3247DFBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedOrBlack.ViewModels", "RedOrBlack.ViewModels\RedOrBlack.ViewModels.csproj", "{6804A57E-8275-42F6-9A9F-03B62ECFEC93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedOrBlack.Web", "RedOrBlack.Web\RedOrBlack.Web.csproj", "{ED1DCF9C-3630-4ACF-8F92-814264ECC216}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{63A772B7-0283-4439-8B88-05CB3247DFBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63A772B7-0283-4439-8B88-05CB3247DFBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63A772B7-0283-4439-8B88-05CB3247DFBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6804A57E-8275-42F6-9A9F-03B62ECFEC93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6804A57E-8275-42F6-9A9F-03B62ECFEC93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6804A57E-8275-42F6-9A9F-03B62ECFEC93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6804A57E-8275-42F6-9A9F-03B62ECFEC93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
