@@ -270,9 +270,15 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     error BetsNotClosed();
     mapping(uint => uint) requestToSpin;
     function spinTheWheel() onlyOwner public{
-        Spin memory currentSpin = spins[spinIds[spinIds.length - 1]];
+        Spin storage currentSpin = spins[spinIds[spinIds.length - 1]];
         if(block.timestamp < currentSpin.startTime + timeForBet)
             revert BetsNotClosed();
+        if(spinBets[currentSpin.spinId].length == 0)
+        {
+            isOpenForWithdrawl = true;
+            currentSpin.spunTime = block.timestamp;
+            return;
+        }
         uint requestId = COORDINATOR.requestRandomWords(
             s_keyHash,
             s_subscriptionId,
