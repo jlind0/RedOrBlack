@@ -1,0 +1,12 @@
+﻿@inherits ReactiveComponentBase<OwnerViewModel>
+@if(ViewModel != null)
+{
+    @ViewModel.CurrentBalance
+    <TelerikNumericTextBox @bind-Value="ViewModel.Amount" Decimals="10"/>
+    <TelerikButton OnClick="ViewModel.Fund.BindCommand<MouseEventArgs>()">Fund</TelerikButton>
+    <TelerikButton OnClick="ViewModel.Widthdraw.BindCommand<MouseEventArgs>()">Withdraw</TelerikButton>
+    <TelerikButton OnClick="ViewModel.Load.BindCommand<MouseEventArgs>()">Reload</TelerikButton>
+}
+@code {
+
+}

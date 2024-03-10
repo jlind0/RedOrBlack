@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedOrBlack.Contracts", "Red
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedOrBlack.ViewModels", "RedOrBlack.ViewModels\RedOrBlack.ViewModels.csproj", "{6804A57E-8275-42F6-9A9F-03B62ECFEC93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedOrBlack.Web", "RedOrBlack.Web\RedOrBlack.Web.csproj", "{ED1DCF9C-3630-4ACF-8F92-814264ECC216}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedOrBlack.Web.Client", "RedOrBlack.Web.Client\RedOrBlack.Web.Client.csproj", "{13F0D6CE-F1BB-471C-9B88-3963D4FDA158}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{6804A57E-8275-42F6-9A9F-03B62ECFEC93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6804A57E-8275-42F6-9A9F-03B62ECFEC93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6804A57E-8275-42F6-9A9F-03B62ECFEC93}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED1DCF9C-3630-4ACF-8F92-814264ECC216}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13F0D6CE-F1BB-471C-9B88-3963D4FDA158}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13F0D6CE-F1BB-471C-9B88-3963D4FDA158}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13F0D6CE-F1BB-471C-9B88-3963D4FDA158}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13F0D6CE-F1BB-471C-9B88-3963D4FDA158}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

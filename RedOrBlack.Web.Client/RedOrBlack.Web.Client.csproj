@@ -4,11 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dcf76561-8c16-4780-8c76-4ebf8687b77d</UserSecretsId>
+    <UserSecretsId>0995165d-5b57-4402-b9e0-fa596f494a5e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Nethereum.HdWallet" Version="4.19.0" />
+    <PackageReference Include="Nethereum.Web3" Version="4.19.0" />
     <PackageReference Include="ReactiveUI.Blazor" Version="19.5.41" />
     <PackageReference Include="Telerik.UI.for.Blazor" Version="5.1.1" />
   </ItemGroup>

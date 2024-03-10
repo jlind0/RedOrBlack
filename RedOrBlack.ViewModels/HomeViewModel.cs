@@ -1,10 +1,14 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using DynamicData.Binding;
+using Microsoft.Extensions.Configuration;
+using Nethereum.Contracts;
+using Nethereum.Util;
 using Nethereum.Web3;
 using ReactiveUI;
 using RedOrBlack.Contracts.Wheel;
 using RedOrBlack.Contracts.Wheel.ContractDefinition;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Numerics;
 using System.Reactive;
@@ -20,13 +24,107 @@ namespace RedOrBlack.ViewModels
         public string ContractAddress { get; set; }
         public string TXData { get; set; }
         public BigInteger Value { get; set; }
+        public BigInteger Gas { get; set; }
     }
-    public class NumberViewModel : ReactiveObject
+    public class OwnerViewModel : ReactiveObject
     {
         protected HomeViewModel Root { get; }
-        public Number Data { get; }
+        public ReactiveCommand<Unit, Unit> Fund { get; }
+        public ReactiveCommand<Unit, Unit> Widthdraw { get; }
+        public ReactiveCommand<Unit, Unit> Load;
+        private decimal amount;
+        public decimal Amount
+        {
+            get => amount;
+            set => this.RaiseAndSetIfChanged(ref amount, value);
+        }
+        private decimal currentBalance;
+        public decimal CurrentBalance
+        {
+            get => currentBalance;
+            set => this.RaiseAndSetIfChanged(ref currentBalance, value);
+        }
+        public OwnerViewModel(HomeViewModel root)
+        {
+            Root = root;
+            Fund = ReactiveCommand.CreateFromTask(DoFund);
+            Widthdraw = ReactiveCommand.CreateFromTask(DoWithdrawl);
+            Load = ReactiveCommand.CreateFromTask(DoLoad);
+        }
+        protected async Task DoLoad()
+        {
+            try
+            {
+                var srv = new WheelService(Root.W3, Root.ContractAddress ?? throw new InvalidDataException());
+                var balance = await srv.CurrentBalanceQueryAsync(new CurrentBalanceFunction()
+                {
+                    FromAddress = Root.AccountNumber
+                });
+                CurrentBalance = UnitConversion.Convert.FromWei(balance, UnitConversion.EthUnit.Ether);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+        protected async Task DoFund()
+        {
+            try
+            {
+                if (!Root.IsOwner || amount <= 0)
+                    return;
+                var tx = new FundFunction()
+                {
+                    AmountToSend = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether),
+                    Gas = 150000,
+                    FromAddress = Root.OwnerAddress
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Value = tx.AmountToSend,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex) 
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+        protected async Task DoWithdrawl()
+        {
+            try
+            {
+                if (!Root.IsOwner || Amount <= 0)
+                    return;
+                var tx = new WidthdrawFundFunction()
+                {
+                    AmountToSend = BigInteger.Zero,
+                    Gas = 150000,
+                    FromAddress = Root.OwnerAddress,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Value = tx.AmountToSend,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
     }
-    
     public class HomeViewModel : ReactiveObject, IDisposable
     {
         public Interaction<string, bool> Alert { get; } = new Interaction<string, bool>();
@@ -72,9 +170,27 @@ namespace RedOrBlack.ViewModels
                 this.RaisePropertyChanged(nameof(IsOwner));
             }
         }
+        private bool hasAccount;
+        public bool HasAccount
+        {
+            get => hasAccount;
+            set => this.RaiseAndSetIfChanged(ref hasAccount, value);
+        }
         public bool IsOwner
         {
-            get => OwnerAddress == AccountNumber;
+            get => OwnerAddress?.ToLower() == AccountNumber?.ToLower();
+        }
+        private AccountViewModel? currentAccount;
+        public AccountViewModel? CurrentAccount
+        {
+            get => currentAccount;
+            set => this.RaiseAndSetIfChanged(ref currentAccount, value);
+        }
+        private OwnerViewModel? ownerVM;
+        public OwnerViewModel? OwnerVM
+        {
+            get => ownerVM;
+            set => this.RaiseAndSetIfChanged(ref ownerVM, value);
         }
         public HomeViewModel(Web3 w3, IConfiguration config)
         {
@@ -84,6 +200,11 @@ namespace RedOrBlack.ViewModels
             SubscriptionId = ulong.Parse(config["VRF:SubscriptionId"] ?? throw new InvalidDataException());
             Deploy = ReactiveCommand.CreateFromTask(DoDeploy);
             Load = ReactiveCommand.CreateFromTask(DoLoad);
+            this.WhenPropertyChanged(p => p.AccountNumber).Subscribe(async p =>
+            {
+                if (!string.IsNullOrWhiteSpace(p.Value))
+                    await DoLoad();
+            }).DisposeWith(disposable);
         }
         protected async Task DoLoad()
         {
@@ -103,9 +224,16 @@ namespace RedOrBlack.ViewModels
                         {
                             FromAddress = AccountNumber
                         });
-
+                        CurrentAccount = new AccountViewModel(this, acctDto.ReturnValue1);
+                        HasAccount = true;
                     }
-                    catch { }
+                    catch 
+                    {
+                        HasAccount = false;
+                        CurrentAccount = new AccountViewModel(this);
+                    }
+                    OwnerVM = new OwnerViewModel(this);
+                    await OwnerVM.Load.Execute().GetAwaiter();
                 }
                 
             }
@@ -169,6 +297,148 @@ namespace RedOrBlack.ViewModels
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+    }
+    public class AccountViewModel : ReactiveObject
+    {
+        private bool isOpen;
+        public bool IsOpen
+        {
+            get => isOpen;
+            set => this.RaiseAndSetIfChanged(ref isOpen, value);
+        }
+        protected HomeViewModel Root { get; }
+        private string? nick;
+        [Required]
+        public string? Nick
+        {
+            get => nick;
+            set => this.RaiseAndSetIfChanged(ref nick, value);
+        }
+        private string? owner;
+        public string? Owner
+        {
+            get => owner;
+            set => this.RaiseAndSetIfChanged(ref owner, value);
+        }
+        private decimal val;
+        public decimal Value
+        {
+            get => val;
+            set => this.RaiseAndSetIfChanged(ref val, value);
+        }
+        private decimal? changeValue;
+        public decimal? ChangeValue
+        {
+            get => changeValue;
+            set => this.RaiseAndSetIfChanged(ref changeValue, value);
+        }
+        public bool IsNew { get; } = true;
+        public ReactiveCommand<Unit, Unit> OpenAccount { get; }
+        public ReactiveCommand<Unit, Unit> FundAccount { get; }
+        public ReactiveCommand<Unit, Unit> Withdraw { get; }
+        public AccountViewModel(HomeViewModel root)
+        {
+            Root = root;
+            OpenAccount = ReactiveCommand.CreateFromTask(DoOpenAccount);
+            FundAccount = ReactiveCommand.CreateFromTask(DoFundAccount);
+            Withdraw = ReactiveCommand.CreateFromTask(DoWithdraw);
+        }
+        public AccountViewModel(HomeViewModel root, Account acct) :this(root)
+        {
+            IsNew = false;
+            Nick = acct.Nick;
+            Owner = acct.Owner;
+            Value = UnitConversion.Convert.FromWei(acct.Value, UnitConversion.EthUnit.Ether);
+        }
+        protected async Task DoOpenAccount()
+        {
+            if (IsNew && Value > 0)
+            {
+                try
+                {
+                    var tx = new OpenAccountFunction()
+                    {
+                        AmountToSend = UnitConversion.Convert.ToWei(Value, UnitConversion.EthUnit.Ether),
+                        FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                        Nick = Nick ?? throw new InvalidDataException(),
+                        Gas = 150000
+                    };
+                    var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                    var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                    {
+                        ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                        TXData = data,
+                        Value = tx.AmountToSend,
+                        Gas = tx.Gas ?? throw new InvalidDataException()
+
+                    }).GetAwaiter();
+                    var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+                }
+                catch(Exception ex)
+                {
+                    await Root.Alert.Handle(ex.Message).GetAwaiter();
+                }
+            }
+        }
+        protected async Task DoFundAccount()
+        {
+            if(!IsNew && ChangeValue > 0)
+            {
+                try
+                {
+                    var tx = new FundAccountFunction()
+                    {
+                        AmountToSend = UnitConversion.Convert.ToWei(ChangeValue ?? throw new InvalidDataException(), UnitConversion.EthUnit.Ether),
+                        FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                        Gas = 150000
+                    };
+                    var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                    var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                    {
+                        ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                        TXData = data,
+                        Value = tx.AmountToSend,
+                        Gas = tx.Gas ?? throw new InvalidDataException()
+
+                    }).GetAwaiter();
+                    var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+                }
+                catch (Exception ex)
+                {
+                    await Root.Alert.Handle(ex.Message).GetAwaiter();
+                }
+            }
+        }
+        protected async Task DoWithdraw()
+        {
+            if (!IsNew && ChangeValue > 0)
+            {
+                try
+                {
+                    var tx = new WithdrawFunction()
+                    {
+                        AmountToSend = BigInteger.Zero,
+                        Amount = UnitConversion.Convert.ToWei(ChangeValue ?? throw new InvalidDataException(), UnitConversion.EthUnit.Ether),
+                        FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                        Gas = 150000
+                    };
+                    var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                    var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                    {
+                        ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                        TXData = data,
+                        Value = tx.AmountToSend,
+                        Gas = tx.Gas ?? throw new InvalidDataException()
+
+                    }).GetAwaiter();
+                    var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+                }
+                catch (Exception ex)
+                {
+                    await Root.Alert.Handle(ex.Message).GetAwaiter();
+                }
+            }
         }
     }
 }

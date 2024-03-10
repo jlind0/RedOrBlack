@@ -1,0 +1,28 @@
+﻿@inherits ReactiveComponentBase<AccountViewModel>
+@if(ViewModel != null)
+{
+    @if (ViewModel.IsNew)
+    {
+        <TelerikForm Model="ViewModel" OnValidSubmit="ViewModel.OpenAccount.BindCommand<EditContext>()">
+            <FormValidation>
+                <DataAnnotationsValidator/>
+            </FormValidation>
+            <FormItems>
+                <FormItem Field="@nameof(ViewModel.Nick)" LabelText="Nick"/>
+                <FormItem Field="@nameof(ViewModel.Value)" LabelText="Value"/>
+            </FormItems>
+        </TelerikForm>
+    }
+    else
+    {
+        <p><b>Nick: </b>@ViewModel.Nick</p>
+        <p><b>Address: </b>@ViewModel.Owner</p>
+        <p><b>Value:</b> @ViewModel.Value</p>
+        <TelerikNumericTextBox Decimals="10" @bind-Value="ViewModel.ChangeValue"/>
+        <TelerikButton OnClick="ViewModel.FundAccount.BindCommand<MouseEventArgs>()">Fund</TelerikButton>
+        <TelerikButton OnClick="ViewModel.Withdraw.BindCommand<MouseEventArgs>()">Withdraw</TelerikButton>
+    }
+}
+@code {
+
+}

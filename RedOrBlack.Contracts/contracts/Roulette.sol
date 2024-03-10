@@ -155,8 +155,6 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     error TransferFailed();
     error IsNotOpenForWithdrawl();
     function openAccount(string memory nick) public payable{
-        if(!isOpenForWithdrawl)
-            revert IsNotOpenForWithdrawl();
         if(accounts[msg.sender].owner == msg.sender)
             revert AccountExists();
         if(msg.value < mindeposit)
