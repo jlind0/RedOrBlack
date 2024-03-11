@@ -384,6 +384,34 @@ namespace RedOrBlack.Contracts.Wheel
              return ContractHandler.SendRequestAndWaitForReceiptAsync(placeColumnBetFunction, cancellationToken);
         }
 
+        public Task<string> PlaceDoubleStreetBetRequestAsync(PlaceDoubleStreetBetFunction placeDoubleStreetBetFunction)
+        {
+             return ContractHandler.SendRequestAsync(placeDoubleStreetBetFunction);
+        }
+
+        public Task<TransactionReceipt> PlaceDoubleStreetBetRequestAndWaitForReceiptAsync(PlaceDoubleStreetBetFunction placeDoubleStreetBetFunction, CancellationTokenSource cancellationToken = null)
+        {
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(placeDoubleStreetBetFunction, cancellationToken);
+        }
+
+        public Task<string> PlaceDoubleStreetBetRequestAsync(byte street, BigInteger amount)
+        {
+            var placeDoubleStreetBetFunction = new PlaceDoubleStreetBetFunction();
+                placeDoubleStreetBetFunction.Street = street;
+                placeDoubleStreetBetFunction.Amount = amount;
+            
+             return ContractHandler.SendRequestAsync(placeDoubleStreetBetFunction);
+        }
+
+        public Task<TransactionReceipt> PlaceDoubleStreetBetRequestAndWaitForReceiptAsync(byte street, BigInteger amount, CancellationTokenSource cancellationToken = null)
+        {
+            var placeDoubleStreetBetFunction = new PlaceDoubleStreetBetFunction();
+                placeDoubleStreetBetFunction.Street = street;
+                placeDoubleStreetBetFunction.Amount = amount;
+            
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(placeDoubleStreetBetFunction, cancellationToken);
+        }
+
         public Task<string> PlaceDozenBetRequestAsync(PlaceDozenBetFunction placeDozenBetFunction)
         {
              return ContractHandler.SendRequestAsync(placeDozenBetFunction);
@@ -438,32 +466,6 @@ namespace RedOrBlack.Contracts.Wheel
                 placeParityBetFunction.Amount = amount;
             
              return ContractHandler.SendRequestAndWaitForReceiptAsync(placeParityBetFunction, cancellationToken);
-        }
-
-        public Task<string> PlaceRowBetRequestAsync(PlaceRowBetFunction placeRowBetFunction)
-        {
-             return ContractHandler.SendRequestAsync(placeRowBetFunction);
-        }
-
-        public Task<TransactionReceipt> PlaceRowBetRequestAndWaitForReceiptAsync(PlaceRowBetFunction placeRowBetFunction, CancellationTokenSource cancellationToken = null)
-        {
-             return ContractHandler.SendRequestAndWaitForReceiptAsync(placeRowBetFunction, cancellationToken);
-        }
-
-        public Task<string> PlaceRowBetRequestAsync(BigInteger amount)
-        {
-            var placeRowBetFunction = new PlaceRowBetFunction();
-                placeRowBetFunction.Amount = amount;
-            
-             return ContractHandler.SendRequestAsync(placeRowBetFunction);
-        }
-
-        public Task<TransactionReceipt> PlaceRowBetRequestAndWaitForReceiptAsync(BigInteger amount, CancellationTokenSource cancellationToken = null)
-        {
-            var placeRowBetFunction = new PlaceRowBetFunction();
-                placeRowBetFunction.Amount = amount;
-            
-             return ContractHandler.SendRequestAndWaitForReceiptAsync(placeRowBetFunction, cancellationToken);
         }
 
         public Task<string> PlaceSplitBetRequestAsync(PlaceSplitBetFunction placeSplitBetFunction)

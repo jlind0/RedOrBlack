@@ -58,7 +58,6 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     mapping(BetType => uint8) payouts; 
     enum BetType{
         StraightUp,
-        Row,
         Split,
         Street,
         Corner,
@@ -110,14 +109,14 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
         addNumber("8", NumberParity.Even, NumberColor.Black, 3, 1, 1, 1);
         addNumber("9", NumberParity.Odd, NumberColor.Red, 3, 2, 1, 1);
         addNumber("10", NumberParity.Even, NumberColor.Black, 4, 0, 1, 1);
-        addNumber("11", NumberParity.Odd, NumberColor.Red, 4, 1, 1, 1);
-        addNumber("12", NumberParity.Even, NumberColor.Black, 4, 2, 1, 1);
-        addNumber("13", NumberParity.Odd, NumberColor.Red, 5, 0, 1, 2);
-        addNumber("14", NumberParity.Even, NumberColor.Black, 5, 1, 1, 2);
-        addNumber("15", NumberParity.Odd, NumberColor.Red, 5, 2, 1, 2);
-        addNumber("16", NumberParity.Even, NumberColor.Black, 6, 0, 1, 2);
-        addNumber("17", NumberParity.Odd, NumberColor.Red, 6, 1, 1, 2);
-        addNumber("18", NumberParity.Even, NumberColor.Black, 6, 2, 1, 2);
+        addNumber("11", NumberParity.Odd, NumberColor.Black, 4, 1, 1, 1);
+        addNumber("12", NumberParity.Even, NumberColor.Red, 4, 2, 1, 1);
+        addNumber("13", NumberParity.Odd, NumberColor.Black, 5, 0, 1, 2);
+        addNumber("14", NumberParity.Even, NumberColor.Red, 5, 1, 1, 2);
+        addNumber("15", NumberParity.Odd, NumberColor.Black, 5, 2, 1, 2);
+        addNumber("16", NumberParity.Even, NumberColor.Red, 6, 0, 1, 2);
+        addNumber("17", NumberParity.Odd, NumberColor.Black, 6, 1, 1, 2);
+        addNumber("18", NumberParity.Even, NumberColor.Red, 6, 2, 1, 2);
         addNumber("19", NumberParity.Odd, NumberColor.Red, 7, 0, 2, 2);
         addNumber("20", NumberParity.Even, NumberColor.Black, 7, 1, 2, 2);
         addNumber("21", NumberParity.Odd, NumberColor.Red, 7, 2, 2, 2);
@@ -128,21 +127,20 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
         addNumber("26", NumberParity.Even, NumberColor.Black, 9, 1, 2, 3);
         addNumber("27", NumberParity.Odd, NumberColor.Red, 9, 2, 2, 3);
         addNumber("28", NumberParity.Even, NumberColor.Black, 10, 0, 2, 3);
-        addNumber("29", NumberParity.Odd, NumberColor.Red, 10, 1, 2, 3);
-        addNumber("30", NumberParity.Even, NumberColor.Black, 10, 2, 2, 3);
-        addNumber("31", NumberParity.Odd, NumberColor.Red, 11, 0, 2, 3);
-        addNumber("32", NumberParity.Even, NumberColor.Black, 11, 1, 2, 3);
-        addNumber("33", NumberParity.Odd, NumberColor.Red, 11, 2, 2, 3);
-        addNumber("34", NumberParity.Even, NumberColor.Black, 12, 0, 2, 3);
-        addNumber("35", NumberParity.Odd, NumberColor.Red, 12, 1, 2, 3);
-        addNumber("36", NumberParity.Even, NumberColor.Black, 12, 2, 2, 3);
+        addNumber("29", NumberParity.Odd, NumberColor.Black, 10, 1, 2, 3);
+        addNumber("30", NumberParity.Even, NumberColor.Red, 10, 2, 2, 3);
+        addNumber("31", NumberParity.Odd, NumberColor.Black, 11, 0, 2, 3);
+        addNumber("32", NumberParity.Even, NumberColor.Red, 11, 1, 2, 3);
+        addNumber("33", NumberParity.Odd, NumberColor.Black, 11, 2, 2, 3);
+        addNumber("34", NumberParity.Even, NumberColor.Red, 12, 0, 2, 3);
+        addNumber("35", NumberParity.Odd, NumberColor.Black, 12, 1, 2, 3);
+        addNumber("36", NumberParity.Even, NumberColor.Red, 12, 2, 2, 3);
         payouts[BetType.Color] = 1;
         payouts[BetType.Column] = 2;
         payouts[BetType.Corner] = 8;
         payouts[BetType.DoubleStreet] = 5;
         payouts[BetType.Dozen] = 2;
         payouts[BetType.Eighteen] = 1;
-        payouts[BetType.Row] = 17;
         payouts[BetType.Split] = 17;
         payouts[BetType.StraightUp] = 35;
         payouts[BetType.Street] = 11;
@@ -319,13 +317,15 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             revert InvalidBet();
          acceptBet(Bet(msg.sender, spinIds[spinIds.length-1], amount, BetType.StraightUp, numberId, 42, 42, NumberColor.Green, NumberParity.Green, new uint[](0), 0, 0));
     }
-    function placeRowBet(uint amount) public{
-         acceptBet(Bet(msg.sender, spinIds[spinIds.length-1], amount, BetType.Row, 42, 0, 42, NumberColor.Green, NumberParity.Green, new uint[](0), 0, 0));
-    }
      function placeStreetBet(uint8 street, uint amount) public{
         if(street == 0 || street > 12)
             revert InvalidBet();
          acceptBet(Bet(msg.sender, spinIds[spinIds.length-1], amount, BetType.Street, 42, street, 42, NumberColor.Green, NumberParity.Green, new uint[](0), 0, 0));
+    }
+    function placeDoubleStreetBet(uint8 street, uint amount) public{
+        if(street == 0 || street > 11)
+            revert InvalidBet();
+         acceptBet(Bet(msg.sender, spinIds[spinIds.length-1], amount, BetType.DoubleStreet, 42, street, 42, NumberColor.Green, NumberParity.Green, new uint[](0), 0, 0));
     }
     function placeDozenBet(uint8 whichDozen, uint amount) public{
         if(whichDozen == 0 || whichDozen > 3)
@@ -432,11 +432,11 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             bool winner = false;
             if(b.betType == BetType.StraightUp && b.number == n.id)
                 winner = true;
-            else if((b.betType == BetType.Row || b.betType == BetType.Street) && b.row == n.row)
+            else if(b.betType == BetType.Street && b.row == n.row)
                 winner = true;
             else if(b.betType == BetType.Column && b.column == n.column && n.color != NumberColor.Green)
                 winner = true;
-            else if(b.betType == BetType.Split || b.betType == BetType.TopLine)
+            else if(b.betType == BetType.Split || b.betType == BetType.TopLine || b.betType == BetType.Corner)
             {
                 uint k = 0;
                 while(k < b.numbers.length){
@@ -451,6 +451,8 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             else if(b.betType == BetType.Eighteen && b.byThe18 == n.which18)
                 winner = true;
             else if(b.betType == BetType.Dozen && b.byTheDozen == n.whichDozen)
+                winner = true;
+            else if(b.betType == BetType.DoubleStreet && (b.row == n.row || n.row + 1 == b.row))
                 winner = true;
             if(winner){
                 uint payout = payouts[b.betType] * b.amount;

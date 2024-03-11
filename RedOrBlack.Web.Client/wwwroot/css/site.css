@@ -89,7 +89,6 @@ a, .btn-link {
 }
 .column-bets {
     display: flex;
-    justify-content: center;
 }
 .roulette-container {
     display: flex;
@@ -107,7 +106,36 @@ a, .btn-link {
     flex-direction: column; /* Keeps the original vertical layout for dozen bets */
     margin-right: 5px; /* Adds some spacing between the dozen-bets and the grid */
 }
-
+.doublestreet-bets {
+    flex-shrink: 0; /* Prevents the dozen-bets from shrinking */
+    display: flex;
+    flex-direction: column; /* Keeps the original vertical layout for dozen bets */
+    margin-right: 5px; /* Adds some spacing between the dozen-bets and the grid */
+}
+.doublestreetbet {
+    height: 125px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 2px;
+    transform: rotate(-90deg);
+    transform-origin: center;
+}
+.doublestreetbetspacer {
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 30px;
+    cursor: pointer;
+    margin-right: 2px;
+    transform: rotate(-90deg);
+    transform-origin: center;
+}
 .dozbet {
     height: 300px;
     display: flex;
@@ -145,7 +173,39 @@ a, .btn-link {
     cursor: pointer;
     margin-right: 2px; /* Adds spacing between the numbers */
 }
-
+.split-bet {
+    width: 20px;
+    height: 75px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 15px;
+    cursor: pointer;
+    margin-right: 2px; /* Adds spacing between the numbers */
+}
+.split-bet2 {
+    width: 75px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 15px;
+    cursor: pointer;
+    margin-right: 2px; /* Adds spacing between the numbers */
+}
+.split-space {
+    width: 20px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 15px;
+    cursor: pointer;
+    margin-right: 2px; /* Adds spacing between the numbers */
+}
 /* Keep the rest of the CSS unchanged */
 
 
@@ -195,3 +255,24 @@ a, .btn-link {
     .bet:hover {
         background-color: darkgrey;
     }
+.street-bet, .double-street-bet {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    margin: 4px 0;
+}
+
+.street-bet {
+    height: 70px;
+    width: 40px; /* Match the number cell width */
+    transform: rotate(-90deg);
+    transform-origin: center;
+}
+
+.double-street-bet {
+    height: 20px;
+    width: 300px; /* Approximate width for six numbers */
+    margin-bottom: 10px; /* Add some space before the next row */
+}

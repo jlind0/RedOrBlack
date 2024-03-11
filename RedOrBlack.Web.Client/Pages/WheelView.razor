@@ -16,22 +16,69 @@
             <div class="dozbet">2nd 12</div>
             <div class="dozbet">3rd 12</div>
         </div>
+        <div class="doublestreet-bets">
+            <div class="doublestreetbet">0-3</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">4-9</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">10-15</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">16-21</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">22-27</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">28-33</div>
+        </div>
+        <div class="doublestreet-bets">
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">1-6</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">7-12</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">13-18</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">19-24</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">25-30</div>
+            <div class="doublestreetbetspacer">&nbsp;</div>
+            <div class="doublestreetbet">31-36</div>
+        </div>
         <div class="grid-container">
             <div class="number-section">
                 @foreach (var columns in ViewModel.Numbers.GroupBy(n => n.Data.Row).OrderBy(g => g.Key))
                 {
-                    string special = columns.Key == 0 ? " special" : "";
-                    <div class="number-row @special">
+                    <div class="number-row">
                         @foreach (var n in columns)
                         {
                             <div class="number @n.Color.ToString()">@n.Data.Name</div>
+                            @if((n.Data.Row > 0 && n.Data.Column < 2) || (n.Data.Row == 0 && n.Data.Column == 0))
+                            {
+                                <div class="split-bet"><i class="fa-solid fa-plus"></i></div>
+                            }
                         }
+                        @if(columns.Key != 0)
+                        {
+                            <!-- Street Bet Button -->
+                            <div class="street-bet">11:1</div>
+                        }
+                        
                     </div>
+                    @if (columns.Key > 0 && columns.Key < 12)
+                    {
+                        <div class="number-row">
+                            <div class="split-bet2"><i class="fa-solid fa-plus"></i></div>
+                            <div class="split-space"><i class="fa-solid fa-x"></i></div>
+                            <div class="split-bet2"><i class="fa-solid fa-plus"></i></div>
+                            <div class="split-space"><i class="fa-solid fa-x"></i></div>
+                            <div class="split-bet2"><i class="fa-solid fa-plus"></i></div>
+                        </div>
+                    }
                 }
                 <div class="column-bets">
-                    <div class="colbet">2 to 1</div>
-                    <div class="colbet">2 to 1</div>
-                    <div class="colbet">2 to 1</div>
+                    <div class="colbet">2:1</div>
+                    <div class="colbet">2:1</div>
+                    <div class="colbet">2:1</div>
                 </div>
             </div>
         </div>
