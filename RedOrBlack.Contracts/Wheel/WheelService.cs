@@ -166,6 +166,29 @@ namespace RedOrBlack.Contracts.Wheel
             return ContractHandler.QueryDeserializingToObjectAsync<GetCurrentBetsFunction, GetCurrentBetsOutputDTO>(null, blockParameter);
         }
 
+        public Task<GetCurrentSpinOutputDTO> GetCurrentSpinQueryAsync(GetCurrentSpinFunction getCurrentSpinFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetCurrentSpinFunction, GetCurrentSpinOutputDTO>(getCurrentSpinFunction, blockParameter);
+        }
+
+        public Task<GetCurrentSpinOutputDTO> GetCurrentSpinQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetCurrentSpinFunction, GetCurrentSpinOutputDTO>(null, blockParameter);
+        }
+
+        public Task<GetLastSpinsOutputDTO> GetLastSpinsQueryAsync(GetLastSpinsFunction getLastSpinsFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetLastSpinsFunction, GetLastSpinsOutputDTO>(getLastSpinsFunction, blockParameter);
+        }
+
+        public Task<GetLastSpinsOutputDTO> GetLastSpinsQueryAsync(BigInteger count, BlockParameter blockParameter = null)
+        {
+            var getLastSpinsFunction = new GetLastSpinsFunction();
+                getLastSpinsFunction.Count = count;
+            
+            return ContractHandler.QueryDeserializingToObjectAsync<GetLastSpinsFunction, GetLastSpinsOutputDTO>(getLastSpinsFunction, blockParameter);
+        }
+
         public Task<GetNumbersOutputDTO> GetNumbersQueryAsync(GetNumbersFunction getNumbersFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryDeserializingToObjectAsync<GetNumbersFunction, GetNumbersOutputDTO>(getNumbersFunction, blockParameter);

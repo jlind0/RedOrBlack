@@ -1,4 +1,5 @@
-﻿using DynamicData.Binding;
+﻿using DynamicData;
+using DynamicData.Binding;
 using Microsoft.Extensions.Configuration;
 using Nethereum.Contracts;
 using Nethereum.Util;
@@ -8,6 +9,7 @@ using RedOrBlack.Contracts.Wheel;
 using RedOrBlack.Contracts.Wheel.ContractDefinition;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Numerics;
@@ -131,6 +133,8 @@ namespace RedOrBlack.ViewModels
         public Interaction<TransactionData, string> SignatureRequest { get; } = new Interaction<TransactionData, string>();
         public ReactiveCommand<Unit, Unit> Load { get; }
         public ReactiveCommand<Unit, Unit> Deploy { get; }
+        public ReactiveCommand<Unit, Unit> OpenBets { get; }
+        public ReactiveCommand<Unit, Unit> Spin { get; }
         internal Web3 W3 { get; }
         private string? accountNumber;
         public string? AccountNumber
@@ -192,6 +196,18 @@ namespace RedOrBlack.ViewModels
             get => ownerVM;
             set => this.RaiseAndSetIfChanged(ref ownerVM, value);
         }
+        private bool isOpenForWithdrawl;
+        public bool IsOpenForWithdrawl
+        {
+            get => isOpenForWithdrawl;
+            set => this.RaiseAndSetIfChanged(ref isOpenForWithdrawl, value);
+        }
+        private WheelViewModel? wheelVM;
+        public WheelViewModel? WheelVM
+        {
+            get => wheelVM;
+            set => this.RaiseAndSetIfChanged(ref wheelVM, value);
+        }
         public HomeViewModel(Web3 w3, IConfiguration config)
         {
             W3 = w3;
@@ -200,11 +216,49 @@ namespace RedOrBlack.ViewModels
             SubscriptionId = ulong.Parse(config["VRF:SubscriptionId"] ?? throw new InvalidDataException());
             Deploy = ReactiveCommand.CreateFromTask(DoDeploy);
             Load = ReactiveCommand.CreateFromTask(DoLoad);
+            Spin = ReactiveCommand.CreateFromTask(DoSpin);
+            OpenBets = ReactiveCommand.CreateFromTask(DoOpenBets);
             this.WhenPropertyChanged(p => p.AccountNumber).Subscribe(async p =>
             {
                 if (!string.IsNullOrWhiteSpace(p.Value))
                     await DoLoad();
             }).DisposeWith(disposable);
+        }
+        protected async Task DoSpin()
+        {
+            try
+            {
+                if (IsDeployed)
+                {
+                    WheelService srv = new WheelService(W3, ContractAddress ?? throw new InvalidDataException());
+                    await srv.SpinTheWheelRequestAndWaitForReceiptAsync(new SpinTheWheelFunction()
+                    {
+                        FromAddress = OwnerAddress ?? throw new InvalidDataException(),
+                        Gas = 1500000
+                    });
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                await Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+        protected async Task DoOpenBets()
+        {
+            try
+            {
+                if (IsDeployed)
+                {
+                    WheelService srv = new WheelService(W3, ContractAddress ?? throw new InvalidDataException());
+                    await srv.OpenBetsRequestAndWaitForReceiptAsync();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                await Alert.Handle(ex.Message).GetAwaiter();
+            }
         }
         protected async Task DoLoad()
         {
@@ -234,6 +288,9 @@ namespace RedOrBlack.ViewModels
                     }
                     OwnerVM = new OwnerViewModel(this);
                     await OwnerVM.Load.Execute().GetAwaiter();
+                    IsOpenForWithdrawl = await srv.IsOpenForWithdrawlQueryAsync();
+                    var numbersDTO = await srv.GetNumbersQueryAsync();
+                    WheelVM = new WheelViewModel(this, numbersDTO.Ns);
                 }
                 
             }
@@ -297,6 +354,35 @@ namespace RedOrBlack.ViewModels
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+    }
+    public class WheelViewModel : ReactiveObject
+    {
+        protected HomeViewModel Root { get; }
+        public ObservableCollection<NumberViewModel> Numbers { get; } = new ObservableCollection<NumberViewModel>();
+        public WheelViewModel(HomeViewModel root, IEnumerable<Number> numbers)
+        {
+            Root = root;
+            Numbers.AddRange(numbers.Select(n => new NumberViewModel(root, this, n)));
+        }
+    }
+    public class NumberViewModel : ReactiveObject
+    {
+        public enum NumberColors : byte
+        {
+            green,
+            red,
+            black
+        }
+        public Number Data { get; }
+        protected HomeViewModel Root { get; }
+        protected WheelViewModel Wheel { get; }
+        public NumberColors Color { get => (NumberColors)Data.Color; }
+        public NumberViewModel(HomeViewModel root, WheelViewModel wheel, Number data)
+        {
+            Data = data;
+            Root = root;
+            Wheel = wheel;
         }
     }
     public class AccountViewModel : ReactiveObject

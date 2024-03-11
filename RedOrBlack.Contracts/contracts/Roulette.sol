@@ -27,7 +27,7 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     uint public minbetoutside = 0.001 ether;
     mapping(address => Account) accounts;
     address[] accountAddresses;
-    bool public isOpenForWithdrawl;
+    bool public isOpenForWithdrawl = true;
     uint constant timeBetweenBets = 3 minutes;
     uint constant timeForBet = 5 minutes;
     mapping(uint => Spin) spins;
@@ -154,6 +154,7 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     error InsufficentFunds();
     error TransferFailed();
     error IsNotOpenForWithdrawl();
+    error NoSpinsAvailable();
     function openAccount(string memory nick) public payable{
         if(accounts[msg.sender].owner == msg.sender)
             revert AccountExists();
@@ -161,6 +162,23 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             revert MoreFundsRequired();
         accountAddresses.push(msg.sender);
         accounts[msg.sender] = Account(msg.sender, nick, msg.value);
+    }
+    function getCurrentSpin() public view returns(Spin memory)
+    {
+        if(spinIds.length == 0)
+            revert NoSpinsAvailable();
+        return spins[spinIds.length - 1];
+    }
+    function getLastSpins(uint count) public view returns(Spin[] memory){
+        if(count > spinIds.length)
+            count = spinIds.length;
+        Spin[] memory yieldSpins = new Spin[](count);
+        uint i = 0;
+        while(i < count){
+            yieldSpins[i] = spins[spinIds[spinIds.length - i - 1]];
+            i++;
+        }
+        return yieldSpins;
     }
     function getAccount() public view returns(Account memory){
         if(accounts[msg.sender].owner != msg.sender)
@@ -248,6 +266,8 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     error SpinNotFound();
     error SpinClosedForBets();
     function getCurrentBets() public view returns (Bet[] memory){
+        if(spinIds.length == 0)
+            revert NoSpinsAvailable();
         uint spinId = spinIds[spinIds.length - 1];
         return spinBets[spinId];
     }

@@ -1,0 +1,42 @@
+﻿@inherits ReactiveComponentBase<WheelViewModel>
+@if(ViewModel != null)
+{
+    <div class="roulette-container">
+        <div class="simple-bets">
+            <div class="smplbet">&nbsp;</div>
+            <div class="smplbet">1-18</div>
+            <div class="smplbet">Even</div>
+            <div class="smplbet">Red</div>
+            <div class="smplbet">Black</div>
+            <div class="smplbet">Odd</div>
+            <div class="smplbet">19-36</div>
+        </div>
+        <div class="dozen-bets">
+            <div class="dozbet">1st 12</div>
+            <div class="dozbet">2nd 12</div>
+            <div class="dozbet">3rd 12</div>
+        </div>
+        <div class="grid-container">
+            <div class="number-section">
+                @foreach (var columns in ViewModel.Numbers.GroupBy(n => n.Data.Row).OrderBy(g => g.Key))
+                {
+                    string special = columns.Key == 0 ? " special" : "";
+                    <div class="number-row @special">
+                        @foreach (var n in columns)
+                        {
+                            <div class="number @n.Color.ToString()">@n.Data.Name</div>
+                        }
+                    </div>
+                }
+                <div class="column-bets">
+                    <div class="colbet">2 to 1</div>
+                    <div class="colbet">2 to 1</div>
+                    <div class="colbet">2 to 1</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@code {
+
+}

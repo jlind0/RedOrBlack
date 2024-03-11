@@ -15,6 +15,15 @@
         @if (ViewModel.IsDeployed)
         {
             <TelerikButton OnClick="ViewModel.Load.BindCommand<MouseEventArgs>()">Reload</TelerikButton>
+            @if(ViewModel.IsOpenForWithdrawl)
+            {
+                <TelerikButton OnClick="ViewModel.OpenBets.BindCommand<MouseEventArgs>()">Open Bets</TelerikButton>
+            }
+            else
+            {
+                <TelerikButton OnClick="ViewModel.Spin.BindCommand<MouseEventArgs>()">Spin</TelerikButton>
+            }
+            
             <p><b>Contract Address:</b> @ViewModel.ContractAddress</p>
             @if (!ViewModel.IsOwner)
             {
@@ -24,6 +33,7 @@
             {
                 <OwnerView ViewModel="ViewModel.OwnerVM"/>
             }
+            <WheelView ViewModel="ViewModel.WheelVM"/>
         }
         else
         {

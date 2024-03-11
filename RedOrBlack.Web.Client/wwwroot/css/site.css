@@ -66,3 +66,132 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+.roulette-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+.number-section {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+.emptyrow{
+    height:75px;
+    width:30px;
+    justify-content: flex-start;
+}
+.number-row {
+    display: flex;
+    justify-content: center; /* Center the numbers for aesthetics */
+}
+.column-bets {
+    display: flex;
+    justify-content: center;
+}
+.roulette-container {
+    display: flex;
+    flex-direction: row; /* Aligns the children (dozen-bets and grid-container) side by side */
+}
+
+.grid-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.dozen-bets {
+    flex-shrink: 0; /* Prevents the dozen-bets from shrinking */
+    display: flex;
+    flex-direction: column; /* Keeps the original vertical layout for dozen bets */
+    margin-right: 5px; /* Adds some spacing between the dozen-bets and the grid */
+}
+
+.dozbet {
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 30px;
+    cursor: pointer;
+    margin-right: 2px;
+    transform: rotate(-90deg);
+    transform-origin: center;
+}
+.colbet {
+    width: 75px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 2px; /* Adds spacing between the numbers */
+}
+.special .number{
+    width:120px;
+}
+.number {
+    width: 75px;
+    height: 75px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    margin-right: 2px; /* Adds spacing between the numbers */
+}
+
+/* Keep the rest of the CSS unchanged */
+
+
+.green {
+    background-color: green;
+}
+
+.red {
+    background-color: red;
+}
+
+.black {
+    background-color: black;
+}
+
+.outside-bets {
+    display: flex;
+    flex-direction: column;
+}
+
+.simple-bets {
+    flex-shrink: 0; /* Prevents the dozen-bets from shrinking */
+    display: flex;
+    flex-direction: column; /* Keeps the original vertical layout for dozen bets */
+    margin-right: 5px; /* Adds some spacing between the dozen-bets and the grid */
+}
+.smplbet {
+    height: 130px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-size: 30px;
+    cursor: pointer;
+    margin-right: 2px;
+    transform: rotate(-90deg);
+    transform-origin: center;
+}
+.bet {
+    background-color: grey;
+    color: white;
+    padding: 5px 10px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+    .bet:hover {
+        background-color: darkgrey;
+    }
