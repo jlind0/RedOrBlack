@@ -476,10 +476,13 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
         numbersByDozen[whichDozen].push(n);
         numbersBy18[which18].push(n);
     }
+    error SpinAlreadySpun();
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) 
     internal override {
         Spin storage spin = spins[requestToSpin[requestId]];
-        uint spinIndex = numberIds.length % randomWords[0];
+        if(spin.spunNumberId != 42)
+            revert SpinAlreadySpun();
+        uint spinIndex =  randomWords[0] % numberIds.length;
         spin.spunNumberId = numberIds[spinIndex];
         spin.spunTime = block.timestamp;
         Number memory n = numbers[spin.spunNumberId];
