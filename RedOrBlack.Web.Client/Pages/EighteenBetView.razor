@@ -1,0 +1,23 @@
+﻿@inherits ReactiveComponentBase<EighteenBetViewModel>
+
+@if (ViewModel != null)
+{
+    <TelerikDialog @bind-Visible="ViewModel.IsOpen" Title="Half Bet (1:1)">
+        <DialogContent>
+            <h2>@if (ViewModel.Value == 1) 
+                { 
+                    <span>1-18</span>
+                }
+                else
+                {
+                    <span>19-36</span>
+                }
+            </h2>
+            <TelerikNumericTextBox @bind-Value="ViewModel.Amount" Decimals="12" />
+            <TelerikButton OnClick="ViewModel.Bet.BindCommand<MouseEventArgs>()">Bet</TelerikButton>
+        </DialogContent>
+    </TelerikDialog>
+}
+@code {
+
+}

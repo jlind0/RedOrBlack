@@ -1,0 +1,15 @@
+﻿@inherits ReactiveComponentBase<TopLineBetViewModel>
+
+@if (ViewModel != null)
+{
+    <TelerikDialog @bind-Visible="ViewModel.IsOpen" Title="Top Line Bet (6:1)">
+        <DialogContent>
+            <h2>00-0-1-2-3</h2>
+            <TelerikNumericTextBox @bind-Value="ViewModel.Amount" Decimals="12" />
+            <TelerikButton OnClick="ViewModel.Bet.BindCommand<MouseEventArgs>()">Bet</TelerikButton>
+        </DialogContent>
+    </TelerikDialog>
+}
+@code {
+
+}

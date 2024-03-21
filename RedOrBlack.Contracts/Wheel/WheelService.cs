@@ -143,6 +143,16 @@ namespace RedOrBlack.Contracts.Wheel
             return ContractHandler.QueryDeserializingToObjectAsync<GetAccountFunction, GetAccountOutputDTO>(null, blockParameter);
         }
 
+        public Task<GetAccountsOutputDTO> GetAccountsQueryAsync(GetAccountsFunction getAccountsFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAccountsFunction, GetAccountsOutputDTO>(getAccountsFunction, blockParameter);
+        }
+
+        public Task<GetAccountsOutputDTO> GetAccountsQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAccountsFunction, GetAccountsOutputDTO>(null, blockParameter);
+        }
+
         public Task<GetBetsForSpinOutputDTO> GetBetsForSpinQueryAsync(GetBetsForSpinFunction getBetsForSpinFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryDeserializingToObjectAsync<GetBetsForSpinFunction, GetBetsForSpinOutputDTO>(getBetsForSpinFunction, blockParameter);
@@ -382,6 +392,40 @@ namespace RedOrBlack.Contracts.Wheel
                 placeColumnBetFunction.Amount = amount;
             
              return ContractHandler.SendRequestAndWaitForReceiptAsync(placeColumnBetFunction, cancellationToken);
+        }
+
+        public Task<string> PlaceCornerBetRequestAsync(PlaceCornerBetFunction placeCornerBetFunction)
+        {
+             return ContractHandler.SendRequestAsync(placeCornerBetFunction);
+        }
+
+        public Task<TransactionReceipt> PlaceCornerBetRequestAndWaitForReceiptAsync(PlaceCornerBetFunction placeCornerBetFunction, CancellationTokenSource cancellationToken = null)
+        {
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(placeCornerBetFunction, cancellationToken);
+        }
+
+        public Task<string> PlaceCornerBetRequestAsync(BigInteger number1, BigInteger number2, BigInteger number3, BigInteger number4, BigInteger amount)
+        {
+            var placeCornerBetFunction = new PlaceCornerBetFunction();
+                placeCornerBetFunction.Number1 = number1;
+                placeCornerBetFunction.Number2 = number2;
+                placeCornerBetFunction.Number3 = number3;
+                placeCornerBetFunction.Number4 = number4;
+                placeCornerBetFunction.Amount = amount;
+            
+             return ContractHandler.SendRequestAsync(placeCornerBetFunction);
+        }
+
+        public Task<TransactionReceipt> PlaceCornerBetRequestAndWaitForReceiptAsync(BigInteger number1, BigInteger number2, BigInteger number3, BigInteger number4, BigInteger amount, CancellationTokenSource cancellationToken = null)
+        {
+            var placeCornerBetFunction = new PlaceCornerBetFunction();
+                placeCornerBetFunction.Number1 = number1;
+                placeCornerBetFunction.Number2 = number2;
+                placeCornerBetFunction.Number3 = number3;
+                placeCornerBetFunction.Number4 = number4;
+                placeCornerBetFunction.Amount = amount;
+            
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(placeCornerBetFunction, cancellationToken);
         }
 
         public Task<string> PlaceDoubleStreetBetRequestAsync(PlaceDoubleStreetBetFunction placeDoubleStreetBetFunction)
@@ -646,6 +690,28 @@ namespace RedOrBlack.Contracts.Wheel
         public Task<TransactionReceipt> SpinTheWheelRequestAndWaitForReceiptAsync(CancellationTokenSource cancellationToken = null)
         {
              return ContractHandler.SendRequestAndWaitForReceiptAsync<SpinTheWheelFunction>(null, cancellationToken);
+        }
+
+        public Task<BigInteger> TimeBetweenBetsQueryAsync(TimeBetweenBetsFunction timeBetweenBetsFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<TimeBetweenBetsFunction, BigInteger>(timeBetweenBetsFunction, blockParameter);
+        }
+
+        
+        public Task<BigInteger> TimeBetweenBetsQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<TimeBetweenBetsFunction, BigInteger>(null, blockParameter);
+        }
+
+        public Task<BigInteger> TimeForBetQueryAsync(TimeForBetFunction timeForBetFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<TimeForBetFunction, BigInteger>(timeForBetFunction, blockParameter);
+        }
+
+        
+        public Task<BigInteger> TimeForBetQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<TimeForBetFunction, BigInteger>(null, blockParameter);
         }
 
         public Task<string> TransferOwnershipRequestAsync(TransferOwnershipFunction transferOwnershipFunction)

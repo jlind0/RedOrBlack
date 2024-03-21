@@ -12,7 +12,7 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     VRFCoordinatorV2Interface COORDINATOR;
     address constant vrfCoordinator = 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625;
     bytes32 constant s_keyHash = 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c;
-    uint32 constant callbackGasLimit = 1000000;
+    uint32 constant callbackGasLimit = 2500000;
     uint16 constant requestConfirmations = 3;
     uint[] numberIds;
     mapping(uint => Number) numbers;
@@ -28,8 +28,8 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     mapping(address => Account) accounts;
     address[] accountAddresses;
     bool public isOpenForWithdrawl = true;
-    uint constant timeBetweenBets = 3 minutes;
-    uint constant timeForBet = 5 minutes;
+    uint public constant timeBetweenBets = 3 minutes;
+    uint public constant timeForBet = 5 minutes;
     mapping(uint => Spin) spins;
     uint[] spinIds;
     uint public currentBalance;
@@ -153,6 +153,11 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     error TransferFailed();
     error IsNotOpenForWithdrawl();
     error NoSpinsAvailable();
+    event BetPlaced();
+    event AccountAdded();
+    event NewSpinOpened();
+    event SpinStarted();
+    event Spun();
     function openAccount(string memory nick) public payable{
         if(accounts[msg.sender].owner == msg.sender)
             revert AccountExists();
@@ -160,6 +165,16 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             revert MoreFundsRequired();
         accountAddresses.push(msg.sender);
         accounts[msg.sender] = Account(msg.sender, nick, msg.value);
+        emit AccountAdded();
+    }
+    function getAccounts() public view returns(Account[] memory){
+        Account[] memory accts = new Account[](accountAddresses.length);
+        uint i = 0;
+        while(i < accountAddresses.length){
+            accts[i] = accounts[accountAddresses[i]];
+            i++;
+        }
+        return accts;
     }
     function getCurrentSpin() public view returns(Spin memory)
     {
@@ -258,6 +273,7 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
         uint spinId = spinIds.length + 1;
         spinIds.push(spinId);
         spins[spinId] = Spin(spinId, block.timestamp, false, 42, 0);
+        emit NewSpinOpened();
         return spinId;
     }
     error InvalidBetAmount(bool tooHigh);
@@ -311,6 +327,7 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             1
             );
         requestToSpin[requestId] = currentSpin.spinId;
+        emit SpinStarted();
     }
     function placeStraightUpBet(uint numberId, uint amount) public{
          if(numbers[numberId].id != numberId)
@@ -340,13 +357,55 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
     function placeSplitBet(uint number1, uint number2, uint amount) public{
         Number memory n1 = numbers[number1];
         Number memory n2 = numbers[number2];
-        bool isValid = (n1.row == n2.row && (n1.column - 1 == n2.column || n2.column -1 == n2.column)) || (n1.column == n2.column && (n2.row -1 == n1.row || n1.row - 1 == n2.row));
+        bool isValid = (n1.row == n2.row && (n1.column - 1 == n2.column || n2.column -1 == n1.column)) || (n1.column == n2.column && (n2.row -1 == n1.row || n1.row - 1 == n2.row));
         if(!isValid)
             revert InvalidBet();
         uint[] memory ns = new uint[](2);
         ns[0] = number1;
         ns[1] = number2;
         acceptBet(Bet(msg.sender, spinIds[spinIds.length-1], amount, BetType.Split, 42, 42, 42, NumberColor.Green, NumberParity.Green, ns, 0, 0));
+    }
+    function placeCornerBet(uint number1, uint number2, uint number3, uint number4, uint amount) public{
+        Number memory n1 = numbers[number1];
+        Number memory n2 = numbers[number2];
+        Number memory n3 = numbers[number3];
+        Number memory n4 = numbers[number4];
+        Number[] memory unsorted = new Number[](4);
+        unsorted[0] = n1;
+        unsorted[1] = n2;
+        unsorted[2] = n3;
+        unsorted[3] = n4;
+        Number[] memory sortedNumbers = sortNumbersByPosition(unsorted);
+        bool isValid = (sortedNumbers[0].row == sortedNumbers[1].row && sortedNumbers[0].column + 1 == sortedNumbers[1].column &&
+                    sortedNumbers[2].row == sortedNumbers[3].row && sortedNumbers[2].column + 1 == sortedNumbers[3].column &&
+                    sortedNumbers[0].row + 1 == sortedNumbers[2].row && sortedNumbers[1].row + 1 == sortedNumbers[3].row) ||
+                   (sortedNumbers[0].column == sortedNumbers[2].column && sortedNumbers[0].row + 1 == sortedNumbers[2].row &&
+                    sortedNumbers[1].column == sortedNumbers[3].column && sortedNumbers[1].row + 1 == sortedNumbers[3].row &&
+                    sortedNumbers[0].column + 1 == sortedNumbers[1].column && sortedNumbers[2].column + 1 == sortedNumbers[3].column);
+        if(!isValid)
+            revert InvalidBet();
+        uint[] memory ns = new uint[](4);
+        ns[0] = number1;
+        ns[1] = number2;
+        ns[2] = number3;
+        ns[3] = number4;
+        acceptBet(Bet(msg.sender, spinIds[spinIds.length-1], amount, BetType.Corner, 42, 42, 42, NumberColor.Green, NumberParity.Green, ns, 0, 0));
+    }
+    function sortNumbersByPosition(Number[] memory nums) private pure returns (Number[] memory) {
+        uint length = nums.length;
+        for (uint i = 1; i < length; i++) {
+            Number memory key = nums[i];
+            uint j = i - 1;
+
+            // Move elements of numbers[0..i-1], that are greater than key, to one position ahead of their current position
+            while (j >= 0 && (nums[j].row > key.row || (nums[j].row == key.row && nums[j].column > key.column))) {
+                nums[j + 1] = nums[j];
+                if(j == 0) break; // Added to avoid underflow
+                j--;
+            }
+            nums[j + 1] = key;
+        }
+        return nums;
     }
     function placeColumnBet(uint8 column, uint amount) public{
          if(column > 2)
@@ -382,6 +441,7 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
         Account storage acct = accounts[bet.account];
         acct.value -= bet.amount;
         spinBets[spin.spinId].push(bet);
+        emit BetPlaced();
     }
     function calculateExposure(uint spinId) public view returns(uint){
         Bet[] memory bets = spinBets[spinId];
@@ -464,5 +524,6 @@ contract Wheel is VRFConsumerBaseV2, Ownable, ReentrancyGuard{
             i++;
         }
         isOpenForWithdrawl = true;
+        emit Spun();
     }
 }

@@ -34,6 +34,7 @@
                 <OwnerView ViewModel="ViewModel.OwnerVM"/>
             }
             <WheelView ViewModel="ViewModel.WheelVM"/>
+            @ViewModel.TimeToSpin.ToLocalTime().ToShortTimeString()
         }
         else
         {

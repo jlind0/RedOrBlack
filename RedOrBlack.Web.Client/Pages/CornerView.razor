@@ -1,0 +1,15 @@
+﻿@inherits ReactiveComponentBase<CornerBetViewModel>
+
+@if (ViewModel != null)
+{
+    <TelerikDialog @bind-Visible="ViewModel.IsOpen" Title="Corner Bet (8:1)">
+        <DialogContent>
+            <h2>@ViewModel.Value</h2>
+            <TelerikNumericTextBox @bind-Value="ViewModel.Amount" Decimals="12" />
+            <TelerikButton OnClick="ViewModel.Bet.BindCommand<MouseEventArgs>()">Bet</TelerikButton>
+        </DialogContent>
+    </TelerikDialog>
+}
+@code {
+
+}

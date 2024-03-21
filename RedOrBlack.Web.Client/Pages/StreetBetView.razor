@@ -1,0 +1,20 @@
+﻿@inherits ReactiveComponentBase<StreetBetViewModel>
+
+@if (ViewModel != null)
+{
+    <TelerikDialog @bind-Visible="ViewModel.IsOpen" Title="Street Bet (11:1)">
+        <DialogContent>
+            <ul>
+                @foreach (var n in ViewModel.Numbers)
+                {
+                    <li>@n.Name</li>
+                }
+            </ul>
+            <TelerikNumericTextBox @bind-Value="ViewModel.Amount" Decimals="12" />
+            <TelerikButton OnClick="ViewModel.Bet.BindCommand<MouseEventArgs>()">Bet</TelerikButton>
+        </DialogContent>
+    </TelerikDialog>
+}
+@code {
+
+}

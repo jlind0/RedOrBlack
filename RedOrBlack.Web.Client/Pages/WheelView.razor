@@ -1,89 +1,503 @@
 ﻿@inherits ReactiveComponentBase<WheelViewModel>
 @if(ViewModel != null)
 {
-    <div class="roulette-container">
-        <div class="simple-bets">
-            <div class="smplbet">&nbsp;</div>
-            <div class="smplbet">1-18</div>
-            <div class="smplbet">Even</div>
-            <div class="smplbet">Red</div>
-            <div class="smplbet">Black</div>
-            <div class="smplbet">Odd</div>
-            <div class="smplbet">19-36</div>
-        </div>
-        <div class="dozen-bets">
-            <div class="dozbet">1st 12</div>
-            <div class="dozbet">2nd 12</div>
-            <div class="dozbet">3rd 12</div>
-        </div>
-        <div class="doublestreet-bets">
-            <div class="doublestreetbet">0-3</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">4-9</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">10-15</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">16-21</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">22-27</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">28-33</div>
-        </div>
-        <div class="doublestreet-bets">
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">1-6</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">7-12</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">13-18</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">19-24</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">25-30</div>
-            <div class="doublestreetbetspacer">&nbsp;</div>
-            <div class="doublestreetbet">31-36</div>
-        </div>
-        <div class="grid-container">
-            <div class="number-section">
-                @foreach (var columns in ViewModel.Numbers.GroupBy(n => n.Data.Row).OrderBy(g => g.Key))
-                {
-                    <div class="number-row">
-                        @foreach (var n in columns)
-                        {
-                            <div class="number @n.Color.ToString()">@n.Data.Name</div>
-                            @if((n.Data.Row > 0 && n.Data.Column < 2) || (n.Data.Row == 0 && n.Data.Column == 0))
-                            {
-                                <div class="split-bet"><i class="fa-solid fa-plus"></i></div>
-                            }
-                        }
-                        @if(columns.Key != 0)
-                        {
-                            <!-- Street Bet Button -->
-                            <div class="street-bet">11:1</div>
-                        }
-                        
-                    </div>
-                    @if (columns.Key > 0 && columns.Key < 12)
-                    {
-                        <div class="number-row">
-                            <div class="split-bet2"><i class="fa-solid fa-plus"></i></div>
-                            <div class="split-space"><i class="fa-solid fa-x"></i></div>
-                            <div class="split-bet2"><i class="fa-solid fa-plus"></i></div>
-                            <div class="split-space"><i class="fa-solid fa-x"></i></div>
-                            <div class="split-bet2"><i class="fa-solid fa-plus"></i></div>
-                        </div>
-                    }
-                }
-                <div class="column-bets">
-                    <div class="colbet">2:1</div>
-                    <div class="colbet">2:1</div>
-                    <div class="colbet">2:1</div>
-                </div>
-            </div>
-        </div>
+    <SplitBetView ViewModel="ViewModel.SplitBetVM"/>
+    <StreetBetView ViewModel="ViewModel.StreetBetVM"/>
+    <DoubleStreetBetView ViewModel="ViewModel.DoubleStreetVM" />
+    <TopLineView ViewModel="ViewModel.TopLineVM"/>
+    <CornerView ViewModel="ViewModel.CornerVM"/>
+    <StraightUpBetView ViewModel="ViewModel.StraightUpVM"/>
+    <ColumnBetView ViewModel="ViewModel.ColumnVM"/>
+    <DozenBetView ViewModel="ViewModel.DozenVM"/>
+    <EighteenBetView ViewModel="ViewModel.EighteenVM"/>
+    <ParityBetView ViewModel="ViewModel.ParityVM" />
+    <ColorBetView ViewModel="ViewModel.ColorVM"/>
+    <div class="roulette-board">
+
+   
+    <div class="roulette-table-container">
+  <section class="roulette-table-container-first">
+    <a class="link" data-target-cells="00-0" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("00-0")'></a>
+
+    <a class="link" data-target-cells="1-2" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("1-2")'></a>
+                <a class="link" data-target-cells="2-3" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("2-3")'></a>
+                <a class="link" data-target-cells="4-5" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("4-5")'></a>
+                <a class="link" data-target-cells="5-6" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("5-6")'></a>
+                <a class="link" data-target-cells="7-8" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("7-8")'></a>
+                <a class="link" data-target-cells="8-9" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("8-9")'></a>
+                <a class="link" data-target-cells="10-11" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("10-11")'></a>
+                <a class="link" data-target-cells="11-12" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("11-12")'></a>
+                <a class="link" data-target-cells="13-14" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("13-14")'></a>
+                <a class="link" data-target-cells="14-15" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("14-15")'></a>
+    <a class="link" data-target-cells="16-17" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("16-17")'></a>
+                <a class="link" data-target-cells="17-18" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("17-18")'></a>
+                <a class="link" data-target-cells="19-20" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("19-20")'></a>
+                <a class="link" data-target-cells="20-21" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("20-21")'></a>
+                <a class="link" data-target-cells="22-23" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("22-23")'></a>
+                <a class="link" data-target-cells="23-24" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("23-24")'></a>
+                <a class="link" data-target-cells="25-26" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("25-26")'></a>
+                <a class="link" data-target-cells="26-27" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("26-27")'></a>
+                <a class="link" data-target-cells="28-29" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("28-29")'></a>
+                <a class="link" data-target-cells="29-30" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("29-30")'></a>
+                <a class="link" data-target-cells="31-32" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("31-32")'></a>
+                <a class="link" data-target-cells="32-33" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("32-33")'></a>
+                <a class="link" data-target-cells="34-35" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("34-35")'></a>
+
+                <a class="link" data-target-cells="1-2-3" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)1)'></a>
+                <a class="link" data-target-cells="4-5-6" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)2)'></a>
+                <a class="link" data-target-cells="7-8-9" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)3)'></a>
+                <a class="link" data-target-cells="10-11-12" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)4)'></a>
+                <a class="link" data-target-cells="13-14-15" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)5)'></a>
+                <a class="link" data-target-cells="16-17-18" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)6)'></a>
+                <a class="link" data-target-cells="19-20-21" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)7)'></a>
+                <a class="link" data-target-cells="22-23-24" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)8)'></a>
+                <a class="link" data-target-cells="25-26-27" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)9)'></a>
+                <a class="link" data-target-cells="28-29-30" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)10)'></a>
+                <a class="link" data-target-cells="31-32-33" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)11)'></a>
+                <a class="link" data-target-cells="34-35-36" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)12)'></a>
+
+                <a class="link bottom" data-target-cells="1-2-3" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)1)'></a>
+                <a class="link bottom" data-target-cells="4-5-6" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)2)'></a>
+                <a class="link bottom" data-target-cells="7-8-9" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)3)'></a>
+                <a class="link bottom" data-target-cells="10-11-12" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)4)'></a>
+                <a class="link bottom" data-target-cells="13-14-15" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)5)'></a>
+                <a class="link bottom" data-target-cells="16-17-18" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)6)'></a>
+                <a class="link bottom" data-target-cells="19-20-21" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)7)'></a>
+                <a class="link bottom" data-target-cells="22-23-24" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)8)'></a>
+                <a class="link bottom" data-target-cells="25-26-27" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)9)'></a>
+                <a class="link bottom" data-target-cells="28-29-30" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)10)'></a>
+                <a class="link bottom" data-target-cells="31-32-33" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)11)'></a>
+                <a class="link bottom" data-target-cells="34-35-36" @onclick='ViewModel.StreetBetVM.Open.BindCommand<MouseEventArgs>((byte)12)'></a>
+
+                <a class="link" data-target-cells="35-36" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("35-36")'></a>
+                <a class="link-bar" data-target-cells="00-0-1-2-3" @onclick='ViewModel.TopLineVM.Open.BindCommand<MouseEventArgs>()'></a>
+                <a class="link-bar bottom" data-target-cells="00-0-1-2-3" @onclick='ViewModel.TopLineVM.Open.BindCommand<MouseEventArgs>()'></a>
+                <a class="link" data-target-cells="00-0-1-2-3" @onclick='ViewModel.TopLineVM.Open.BindCommand<MouseEventArgs>()'></a>
+                <a class="link bottom" data-target-cells="00-0-1-2-3" @onclick='ViewModel.TopLineVM.Open.BindCommand<MouseEventArgs>()'></a>
+
+                <a class="link bottom" data-target-cells="1-2-3-4-5-6" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)1)'></a>
+                <a class="link bottom" data-target-cells="4-5-6-7-8-9" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)2)'></a>
+                <a class="link bottom" data-target-cells="7-8-9-10-11-12" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)3)'></a>
+                <a class="link bottom" data-target-cells="10-11-12-13-14-15" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)4)'></a>
+                <a class="link bottom" data-target-cells="13-14-15-16-17-18" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)5)'></a>
+                <a class="link bottom" data-target-cells="16-17-18-19-20-21" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)6)'></a>
+    <a class="link bottom" data-target-cells="19-20-21-22-23-24" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)7)'></a>
+    <a class="link bottom" data-target-cells="22-23-24-25-26-27" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)8)'></a>
+                <a class="link bottom" data-target-cells="25-26-27-28-29-30" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)9)'></a>
+                <a class="link bottom" data-target-cells="28-29-30-31-32-33" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)10)'></a>
+                <a class="link bottom" data-target-cells="31-32-33-34-35-36" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)11)'></a>
+
+
+
+
+                <a class="link" data-target-cells="1-2-3-4-5-6" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)1)'></a>
+                <a class="link" data-target-cells="2-3-5-6" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("2-3-5-6")'></a>
+                <a class="link" data-target-cells="5-6-8-9" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("5-6-8-9")'></a>
+                <a class="link" data-target-cells="8-9-11-12" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("8-9-11-12")'></a>
+                <a class="link" data-target-cells="11-12-14-15" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("11-12-14-15")'></a>
+                <a class="link" data-target-cells="14-15-17-18" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("14-15-17-18")'></a>
+                <a class="link" data-target-cells="17-18-20-21" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("17-18-20-21")'></a>
+                <a class="link" data-target-cells="20-21-23-24" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("20-21-23-24")'></a>
+                <a class="link" data-target-cells="23-24-26-27" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("23-24-26-27")'></a>
+                <a class="link" data-target-cells="26-27-29-30" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("26-27-29-30")'></a>
+
+                <a class="link" data-target-cells="29-30-32-33" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("29-30-32-33")'></a>
+                <a class="link" data-target-cells="32-33-35-36" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("32-33-35-36")'></a>
+
+
+                <a class="link" data-target-cells="1-2-4-5" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("1-2-4-5")'></a>
+                <a class="link" data-target-cells="4-5-7-8" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("4-5-7-8")'></a>
+                <a class="link" data-target-cells="7-8-10-11" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("7-8-10-11")'></a>
+                <a class="link" data-target-cells="10-11-13-14" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("10-11-13-14")'></a>
+                <a class="link" data-target-cells="13-14-16-17" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("13-14-16-17")'></a>
+                <a class="link" data-target-cells="16-17-19-20" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("16-17-19-20")'></a>
+                <a class="link" data-target-cells="19-20-22-23" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("19-20-22-23")'></a>
+                <a class="link" data-target-cells="22-23-25-26" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("22-23-25-26")'></a>
+                <a class="link" data-target-cells="25-26-28-29" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("25-26-28-29")'></a>
+                <a class="link" data-target-cells="28-29-31-32" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("28-29-31-32")'></a>
+                <a class="link" data-target-cells="31-32-34-35" @onclick='ViewModel.CornerVM.Open.BindCommand<MouseEventArgs>("31-32-34-35")'></a>
+
+
+                <a class="link" data-target-cells="4-5-6-7-8-9" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)2)'></a>
+                <a class="link" data-target-cells="10-11-12-13-14-15" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)4)'></a>
+    <a class="link" data-target-cells="13-14-15-16-17-18" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)5)'></a>
+                <a class="link" data-target-cells="16-17-18-19-20-21" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)6)'></a>
+                <a class="link" data-target-cells="19-20-21-22-23-24" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)7)'></a>
+                <a class="link" data-target-cells="22-23-24-25-26-27" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)8)'></a>
+                <a class="link" data-target-cells="25-26-27-28-29-30" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)9)'></a>
+                <a class="link" data-target-cells="28-29-30-31-32-33" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)10)'></a>
+                <a class="link" data-target-cells="31-32-33-34-35-36" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)11)'></a>
+
+                <a class="link" data-target-cells="7-8-9-10-11-12" @onclick='ViewModel.DoubleStreetVM.Open.BindCommand<MouseEventArgs>((byte)3)'></a>
+
+
+
+                <a class="link" data-target-cells="3-6" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("3-6")'></a>
+                <a class="link" data-target-cells="6-9" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("6-9")'></a>
+                <a class="link" data-target-cells="9-12" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("9-12")'></a>
+                <a class="link" data-target-cells="12-15" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("12-15")'></a>
+                <a class="link" data-target-cells="15-18" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("15-18")'></a>
+                <a class="link" data-target-cells="18-21" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("18-21")'></a>
+                <a class="link" data-target-cells="21-24" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("21-24")'></a>
+                <a class="link" data-target-cells="24-27" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("24-27")'></a>
+                <a class="link" data-target-cells="27-30" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("27-30")'></a>
+                <a class="link" data-target-cells="30-33" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("30-33")'></a>
+                <a class="link" data-target-cells="33-36" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("33-36")'></a>
+                <a class="link" data-target-cells="2-5" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("2-5")'></a>
+                <a class="link" data-target-cells="5-8" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("5-8")'></a>
+                <a class="link" data-target-cells="8-11" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("8-11")'></a>
+                <a class="link" data-target-cells="11-14" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("11-14")'></a>
+                <a class="link" data-target-cells="14-17" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("14-17")'></a>
+                <a class="link" data-target-cells="17-20" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("17-20")'></a>
+                <a class="link" data-target-cells="20-23" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("20-23")'></a>
+                <a class="link" data-target-cells="23-26" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("22-26")'></a>
+                <a class="link" data-target-cells="26-29" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("26-29")'></a>
+                <a class="link" data-target-cells="29-32" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("29-32")'></a>
+                <a class="link" data-target-cells="32-35" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("32-35")'></a>
+
+                <a class="link" data-target-cells="1-4" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("1-4")'></a>
+                <a class="link" data-target-cells="4-7" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("4-7")'></a>
+                <a class="link" data-target-cells="7-10" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("7-10")'></a>
+                <a class="link" data-target-cells="10-13" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("10-13")'></a>
+                <a class="link" data-target-cells="13-16" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("13-16")'></a>
+                <a class="link" data-target-cells="16-19" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("16-19")'></a>
+                <a class="link" data-target-cells="19-22" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("19-22")'></a>
+                <a class="link" data-target-cells="22-25" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("22-25")'></a>
+                <a class="link" data-target-cells="25-28" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("25-28")'></a>
+                <a class="link" data-target-cells="28-31" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("28-31")'></a>
+                <a class="link" data-target-cells="31-34" @onclick='ViewModel.SplitBetVM.Open.BindCommand<MouseEventArgs>("31-34")'></a>
+
+                <a class="link-street link-street-1" data-target-cells="1-4-7-10-13-16-19-22-25-28-31-34" @onclick='ViewModel.ColumnVM.Open.BindCommand<MouseEventArgs>((byte)0)'></a>
+                <a class="link-street link-street-2" data-target-cells="2-5-8-11-14-17-20-23-26-29-32-35" @onclick='ViewModel.ColumnVM.Open.BindCommand<MouseEventArgs>((byte)1)'></a>
+                <a class="link-street link-street-3" data-target-cells="3-6-9-12-15-18-21-24-27-30-33-36" @onclick='ViewModel.ColumnVM.Open.BindCommand<MouseEventArgs>((byte)2)'></a>
+
+                <a class="link-floor link-floor-1-12" data-target-cells="1-2-3-4-5-6-7-8-9-10-11-12" @onclick='ViewModel.DozenVM.Open.BindCommand<MouseEventArgs>((byte)1)' style=""></a>
+
+<a class="link-floor link-floor-13-24" data-target-cells="13-14-15-16-17-18-19-20-21-22-23-24" @onclick='ViewModel.DozenVM.Open.BindCommand<MouseEventArgs>((byte)2)' style=""></a>
+
+                <a class="link-floor link-floor-25-36" data-target-cells="25-26-27-28-29-30-31-32-33-34-35-36" @onclick='ViewModel.DozenVM.Open.BindCommand<MouseEventArgs>((byte)3)' style=""></a>
+
+                <a class="link-floor link-floor-1-18" data-target-cells="1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18" @onclick='ViewModel.EighteenVM.Open.BindCommand<MouseEventArgs>((byte)1)' style="
+"></a>
+
+                <a class="link-floor link-floor-even" data-target-cells="2-4-6-8-10-12-14-16-18-20-22-24-26-28-30-32-34" @onclick='ViewModel.ParityVM.Open.BindCommand<MouseEventArgs>(NumberParity.Even)' style=""></a>
+
+                <a class="link-floor red-rectangle" data-target-cells="1-3-5-7-9-12-14-16-18-19-21-23-25-27-30-32-34-36" @onclick='ViewModel.ColorVM.Open.BindCommand<MouseEventArgs>(NumberColor.Red)' style="
+"></a>
+
+                <a class="link-floor black" data-target-cells="2-4-6-8-10-11-13-15-17-20-22-24-26-28-29-31-33-35" @onclick='ViewModel.ColorVM.Open.BindCommand<MouseEventArgs>(NumberColor.Black)' style=""></a>
+
+
+                <a class="link-floor odd" data-target-cells="1-3-5-7-9-11-13-15-17-19-21-23-25-27-29-31-33-35" @onclick='ViewModel.ParityVM.Open.BindCommand<MouseEventArgs>(NumberParity.Odd)' style="
+"></a>
+
+                <a class="link-floor" data-target-cells="19-20-21-22-23-24-25-26-27-28-29-30-31-32-33-34-35-36" @onclick='ViewModel.EighteenVM.Open.BindCommand<MouseEventArgs>((byte)2)' style=""></a>
+
+
+                <div class="zero-item American cell" data-cell="0" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("0")'>
+      <div class="spleet-bet-catcher"></div>
+      <div class="corner-bet-catcher bottom"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="basket-catcher-bottom"></div>
+      <div class=""></div>
+                    <div class="value">0</div>
     </div>
+    <div class="zero-item American cell" data-cell="00" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("00")'>
+      <div class="corner-bet-catcher "></div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="basket-catcher-top"></div>
+      <div class=""></div>
+      <div class="value">00</div>
+    </div>
+    <div class="red-item cell" data-cell="1" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("1")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="spleet-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">1</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+    <div class="black-item cell" data-cell="2" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("2")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="spleet-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">2</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="red-item cell" data-cell="3" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("3")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">3</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+                <div class="black-item cell" data-cell="4" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("4")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">4</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+    <div class="red-item cell" data-cell="5" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("5")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">5</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="6" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("6")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">6</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="red-item cell" data-cell="7" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("7")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">7</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+                <div class="black-item cell" data-cell="8" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("8")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">8</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="red-item cell" data-cell="9" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("9")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">9</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="10" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("10")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">10</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+    <div class="black-item cell" data-cell="11" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("11")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">11</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="red-item cell" data-cell="12" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("12")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">12</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="13" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("13")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">13</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+    <div class="red-item cell" data-cell="14" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("14")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">14</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="15" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("15")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">15</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+                <div class="red-item cell" data-cell="16" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("16")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">16</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+    <div class="black-item cell" data-cell="17" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("17")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">17</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+                <div class="red-item cell" data-cell="18" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("18")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">18</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="red-item cell" data-cell="19" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("19")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">19</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+                <div class="black-item cell" data-cell="20" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("20")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">20</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+                <div class="red-item cell" data-cell="21" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("21")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">21</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="22" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("22")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">22</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+    <div class="red-item cell" data-cell="23" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("23")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">23</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="24" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("24")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">24</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="red-item cell" data-cell="25" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("25")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">25</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+    <div class="black-item cell" data-cell="26" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("26")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">26</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+                <div class="red-item cell" data-cell="27" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("27")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">27</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="28" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("28")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">28</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+                <div class="black-item cell" data-cell="29" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("29")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">29</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+                <div class="red-item cell" data-cell="30" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("30")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">30</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="black-item cell" data-cell="31" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("31")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">31</div>
+      <div class="split-up-bet-catcher-right"></div>
+      <div class="split-up-bet-catcher-bottom"></div>
+      <div class="six-lines-catcher"></div>
+    </div>
+                <div class="red-item cell" data-cell="32" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("32")'>
+      <div class="corner-bet-catcher"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">32</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+                <div class="black-item cell" data-cell="33" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("33")'>
+      <div class="double-street-catcher-top-right"></div>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">33</div>
+      <div class="split-up-bet-catcher-right"></div>
+    </div>
+    <div class="red-item cell" data-cell="34" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("34")'>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">34</div>
+      <div class="split-up-bet-catcher-bottom"></div>
+    </div>
+    <div class="black-item cell" data-cell="35" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("35")'>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">35</div>
+    </div>
+                <div class="red-item cell" data-cell="36" @onclick='ViewModel.StraightUpVM.Open.BindCommand<MouseEventArgs>("36")'>
+      <div class="split-up-bet-catcher-top"></div>
+      <div class="value">36</div>
+    </div>
+    <div class="column-item cell" data-cell="1st">
+      <div class="value" style="
+">1st</div>
+    </div>
+    <div class="column-item cell" data-cell="2st">
+      <div class="value">2nd</div>
+    </div>
+    <div class="column-item cell" data-cell="3rd">
+      <div class="value" style="
+">3rd</div>
+    </div>
+  </section>
+  <section class="roulette-table-container-second">
+    <div class="doz-item cell" data-cell="1-12">
+      <div>1-12</div>
+    </div>
+    <div class="doz-item cell" data-cell="13-24">
+      <div>13-24</div>
+    </div>
+    <div class="doz-item cell" data-cell="25-36">
+      <div>25-36</div>
+    </div>
+  </section>
+  <div class="roulette-table-container-third">
+    <div class="outside-section cell" data-cell="1-18">
+      <div>1-18</div>
+    </div>
+    <div class="outside-section cell" data-cell="EVEN">
+      <div>EVEN</div>
+    </div>
+    <div class="outside-section">
+      <div class="cell" data-cell="red">
+        <div class="rhomb-red"></div>
+      </div>
+    </div>
+    <div class="outside-section">
+      <div cell="cell" data-cell="black">
+        <div class="rhomb-black"></div>
+      </div>
+    </div>
+    <div class="outside-section cell" data-cell="ODD">
+      <div>ODD</div>
+    </div>
+    <div class="outside-section cell" data-cell="19-36">
+      <div>19-36</div>
+    </div>
+  </div>
+</div>
+    </div>
+    <TelerikGrid Data="ViewModel.Bets" AutoGenerateColumns="true"/>
 }
 @code {
-
+    
 }

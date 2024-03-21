@@ -7,17 +7,12 @@ using Nethereum.Web3;
 using ReactiveUI;
 using RedOrBlack.Contracts.Wheel;
 using RedOrBlack.Contracts.Wheel.ContractDefinition;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Numerics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RedOrBlack.ViewModels
 {
@@ -208,6 +203,13 @@ namespace RedOrBlack.ViewModels
             get => wheelVM;
             set => this.RaiseAndSetIfChanged(ref wheelVM, value);
         }
+        private DateTime timeToSpin;
+        public DateTime TimeToSpin
+        {
+            get => timeToSpin;
+            set => this.RaiseAndSetIfChanged(ref timeToSpin, value);
+        }
+        public Dictionary<string, AccountViewModel> Accounts { get; } = new Dictionary<string, AccountViewModel>();
         public HomeViewModel(Web3 w3, IConfiguration config)
         {
             W3 = w3;
@@ -234,9 +236,9 @@ namespace RedOrBlack.ViewModels
                     await srv.SpinTheWheelRequestAndWaitForReceiptAsync(new SpinTheWheelFunction()
                     {
                         FromAddress = OwnerAddress ?? throw new InvalidDataException(),
-                        Gas = 1500000
+                        Gas = 6000000
                     });
-                    
+
                 }
             }
             catch (Exception ex)
@@ -264,7 +266,7 @@ namespace RedOrBlack.ViewModels
         {
             try
             {
-                if(IsDeployed)
+                if (IsDeployed)
                 {
                     IsLoading = true;
                     WheelService srv = new WheelService(W3, ContractAddress ?? throw new InvalidDataException());
@@ -281,18 +283,29 @@ namespace RedOrBlack.ViewModels
                         CurrentAccount = new AccountViewModel(this, acctDto.ReturnValue1);
                         HasAccount = true;
                     }
-                    catch 
+                    catch
                     {
                         HasAccount = false;
                         CurrentAccount = new AccountViewModel(this);
                     }
+                    var acctDTO = await srv.GetAccountsQueryAsync();
+                    Accounts.Clear();
+                    foreach (var acct in acctDTO.ReturnValue1)
+                        Accounts.Add(acct.Owner, new AccountViewModel(this, acct));
                     OwnerVM = new OwnerViewModel(this);
                     await OwnerVM.Load.Execute().GetAwaiter();
                     IsOpenForWithdrawl = await srv.IsOpenForWithdrawlQueryAsync();
                     var numbersDTO = await srv.GetNumbersQueryAsync();
                     WheelVM = new WheelViewModel(this, numbersDTO.Ns);
+                    await WheelVM.LoadBets.Execute().GetAwaiter();
+                    try
+                    {
+                        var spin = await srv.GetCurrentSpinQueryAsync();
+                        TimeToSpin = spin.ReturnValue1.StartTime.FromUnixTimestamp().AddMinutes(5);
+                    }
+                    catch { }
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -318,7 +331,7 @@ namespace RedOrBlack.ViewModels
                     IsDeployed = true;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await Alert.Handle(ex.Message).GetAwaiter();
             }
@@ -356,33 +369,559 @@ namespace RedOrBlack.ViewModels
             GC.SuppressFinalize(this);
         }
     }
+    public static class DateTimeExtensions
+    {
+        public static DateTime FromUnixTimestamp(this BigInteger timestamp)
+        {
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            return dateTime.AddSeconds(((long)timestamp));
+        }
+    }
+    public enum BetType : byte
+    {
+        StraightUp,
+        Split,
+        Street,
+        Corner,
+        TopLine,
+        DoubleStreet,
+        Column,
+        Dozen,
+        Color,
+        Eighteen,
+        Parity
+    }
+    public enum NumberParity : byte
+    {
+        Green,
+        Even,
+        Odd
+    }
+    public enum NumberColor : byte
+    {
+        Green,
+        Red,
+        Black
+    }
+    public class PlacedBetViewModel : ReactiveObject
+    {
+        protected HomeViewModel Root { get; }
+        protected WheelViewModel WheelVM { get; }
+        protected Bet Data { get; }
+        public AccountViewModel Account { get; }
+        public BetType Type { get => (BetType)Data.BetType; }
+        public string SpinId { get => Data.SpinId.ToString(); }
+        public decimal Amount { get => UnitConversion.Convert.FromWei(Data.Amount); }
+        public Number? Number { get => Type == BetType.StraightUp ? WheelVM.NumbersById[Data.Number] : null; }
+        public int? Row { get => Type == BetType.Street || Type == BetType.DoubleStreet ? Data.Row : null; }
+        public int? Column { get => Type == BetType.Column ? Data.Column : null; }
+        public NumberColor? Color { get => Type == BetType.Color ? (NumberColor)Data.Color : null; }
+        public NumberParity? Parity { get => Type == BetType.Parity ? (NumberParity)Data.Parity : null; }
+        public Number[]? Numbers { get => Type == BetType.TopLine || Type == BetType.Split || Type == BetType.Corner ?
+                WheelVM.NumbersById.Where(n => Data.Numbers.Any(nn => nn == n.Key)).Select(n => n.Value).ToArray() : null;
+        }
+        public int? WhichDozen { get => Type == BetType.Dozen ? Data.ByTheDozen : null; }
+        public int? Which18 { get => Type == BetType.Eighteen ? Data.ByThe18 : null; }
+        public PlacedBetViewModel(HomeViewModel root, WheelViewModel wheel, Bet data)
+        {
+            Root = root;
+            WheelVM = wheel;
+            Data = data;
+            Account = root.Accounts[data.Account];
+        }
+    }
     public class WheelViewModel : ReactiveObject
     {
         protected HomeViewModel Root { get; }
-        public ObservableCollection<NumberViewModel> Numbers { get; } = new ObservableCollection<NumberViewModel>();
+        public ObservableCollection<PlacedBetViewModel> Bets { get; } = new ObservableCollection<PlacedBetViewModel>();
+        public Dictionary<BigInteger, Number> NumbersById { get; } = new Dictionary<BigInteger, Number>();
+        public Dictionary<string, Number> Numbers { get; } = new Dictionary<string, Number>();
+        public SplitBetViewModel SplitBetVM { get; }
+        public StreetBetViewModel StreetBetVM { get; }
+        public DoubleStreetBetViewModel DoubleStreetVM { get; }
+        public TopLineBetViewModel TopLineVM { get; }
+        public CornerBetViewModel CornerVM { get; }
+        public StraightUpBetViewModel StraightUpVM { get; }
+        public ColumnBetViewModel ColumnVM { get; }
+        public DozenBetViewModel DozenVM { get; }
+        public ReactiveCommand<Unit, Unit> LoadBets { get; }
+        public EighteenBetViewModel EighteenVM { get; }
+        public ParityBetViewModel ParityVM { get; }
+        public ColorBetViewModel ColorVM { get; }
         public WheelViewModel(HomeViewModel root, IEnumerable<Number> numbers)
         {
             Root = root;
-            Numbers.AddRange(numbers.Select(n => new NumberViewModel(root, this, n)));
+            foreach (var n in numbers)
+            {
+                NumbersById.Add(n.Id, n);
+                Numbers.Add(n.Name, n);
+            }
+            SplitBetVM = new SplitBetViewModel(this, Root);
+            StreetBetVM = new StreetBetViewModel(this, Root);
+            DoubleStreetVM = new DoubleStreetBetViewModel(this, Root);
+            TopLineVM = new TopLineBetViewModel(this, Root);
+            CornerVM = new CornerBetViewModel(this, Root);
+            StraightUpVM = new StraightUpBetViewModel(this, Root);
+            ColumnVM = new ColumnBetViewModel(this, Root);
+            DozenVM = new DozenBetViewModel(this, Root);
+            EighteenVM = new EighteenBetViewModel(this, Root);
+            ColorVM = new ColorBetViewModel(this, Root);
+            LoadBets = ReactiveCommand.CreateFromTask(DoLoadBets);
+            ParityVM = new ParityBetViewModel(this, Root);
+        }
+        protected async Task DoLoadBets()
+        {
+            try
+            {
+                WheelService svc = new WheelService(Root.W3, Root.ContractAddress ?? throw new InvalidDataException());
+                Bets.Clear();
+                var betsDto = await svc.GetCurrentBetsQueryAsync();
+                Bets.AddRange(betsDto.ReturnValue1.Select(b => new PlacedBetViewModel(Root, this, b)));
+
+            }
+            catch
+            {
+                //await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
         }
     }
-    public class NumberViewModel : ReactiveObject
+    public abstract class BetViewModel<TParam> : ReactiveObject
     {
-        public enum NumberColors : byte
+        private bool isOpen;
+        public bool IsOpen
         {
-            green,
-            red,
-            black
+            get => isOpen;
+            set => this.RaiseAndSetIfChanged(ref isOpen, value);
         }
-        public Number Data { get; }
-        protected HomeViewModel Root { get; }
-        protected WheelViewModel Wheel { get; }
-        public NumberColors Color { get => (NumberColors)Data.Color; }
-        public NumberViewModel(HomeViewModel root, WheelViewModel wheel, Number data)
+        private decimal amount;
+        public decimal Amount
         {
-            Data = data;
+            get => amount;
+            set => this.RaiseAndSetIfChanged(ref amount, value);
+        }
+        private TParam? val;
+        public virtual TParam? Value
+        {
+            get => val;
+            set => this.RaiseAndSetIfChanged(ref val, value);
+        }
+        public ReactiveCommand<Unit, Unit> Bet { get; }
+        public ReactiveCommand<TParam, Unit> Open { get; }
+        protected WheelViewModel WheelVM { get; }
+        protected HomeViewModel Root { get; }
+        public BetViewModel(WheelViewModel wheelVM, HomeViewModel root)
+        {
+            WheelVM = wheelVM;
             Root = root;
-            Wheel = wheel;
+            Bet = ReactiveCommand.CreateFromTask(DoBet);
+            Open = ReactiveCommand.Create<TParam>(DoOpen);
+        }
+        protected virtual void DoOpen(TParam value)
+        {
+            Value = value;
+            IsOpen = true;
+        }
+        protected abstract Task DoBet();
+    }
+    public class StreetBetViewModel : BetViewModel<byte>
+    {
+        public override byte Value
+        {
+            set { base.Value = value; this.RaisePropertyChanged(nameof(Numbers)); }
+        }
+        public Number[] Numbers
+        {
+            get => WheelVM.Numbers.Values.Where(n => n.Row == Value).ToArray();
+        }
+        public StreetBetViewModel(WheelViewModel wheelVM, HomeViewModel root) : base(wheelVM, root)
+        {
+        }
+
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceStreetBetFunction tx = new PlaceStreetBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Street = Value,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch(Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class ColumnBetViewModel : BetViewModel<byte>
+    {
+        public ColumnBetViewModel(WheelViewModel wheelVM, HomeViewModel root) : base(wheelVM, root)
+        {
+        }
+
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceColumnBetFunction tx = new PlaceColumnBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Column = Value,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class ParityBetViewModel : BetViewModel<NumberParity>
+    {
+        public ParityBetViewModel(WheelViewModel wheelVM, HomeViewModel root) : base(wheelVM, root)
+        {
+        }
+
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceParityBetFunction tx = new PlaceParityBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Parity = (byte)Value,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class ColorBetViewModel : BetViewModel<NumberColor>
+    {
+        public ColorBetViewModel(WheelViewModel wheelVM, HomeViewModel root) : base(wheelVM, root)
+        {
+        }
+
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceColorBetFunction tx = new PlaceColorBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Color = (byte)Value,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class DozenBetViewModel : BetViewModel<byte>
+    {
+        public DozenBetViewModel(WheelViewModel wheelVM, HomeViewModel root) : base(wheelVM, root)
+        {
+        }
+
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceDozenBetFunction tx = new PlaceDozenBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    WhichDozen = Value,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class EighteenBetViewModel : BetViewModel<byte>
+    {
+        public EighteenBetViewModel(WheelViewModel wheelVM, HomeViewModel root) : base(wheelVM, root)
+        {
+        }
+
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceDozenBetFunction tx = new PlaceDozenBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    WhichDozen = Value,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class DoubleStreetBetViewModel : BetViewModel<byte>
+    {
+        public override byte Value
+        {
+            set { base.Value = value; this.RaisePropertyChanged(nameof(Numbers)); }
+        }
+        public Number[] Numbers
+        {
+            get => WheelVM.Numbers.Values.Where(n => n.Row == Value || n.Row == Value + 1).ToArray();
+        }
+        public DoubleStreetBetViewModel(WheelViewModel wheelVM, HomeViewModel root) : base(wheelVM, root)
+        {
+        }
+
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceDoubleStreetBetFunction tx = new PlaceDoubleStreetBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Street = Value,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class SplitBetViewModel : BetViewModel<string>
+    {
+        public SplitBetViewModel(WheelViewModel wheelVM, HomeViewModel homeVM) :base(wheelVM, homeVM)
+        {
+
+        } 
+        protected override async Task DoBet()
+        {
+            try
+            {
+                if (Value == null)
+                    throw new InvalidDataException();
+                string[] ns = Value.Split('-');
+                if (ns.Length != 2)
+                    throw new InvalidDataException();
+                var n1 = WheelVM.Numbers[ns[0]];
+                var n2 = WheelVM.Numbers[ns[1]];
+                PlaceSplitBetFunction tx = new PlaceSplitBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Number1 = n1.Id,
+                    Number2 = n2.Id,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch(Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class CornerBetViewModel : BetViewModel<string>
+    {
+        public CornerBetViewModel(WheelViewModel wheelVM, HomeViewModel homeVM) : base(wheelVM, homeVM)
+        {
+
+        }
+        protected override async Task DoBet()
+        {
+            try
+            {
+                if (Value == null)
+                    throw new InvalidDataException();
+                string[] ns = Value.Split('-');
+                if (ns.Length != 4)
+                    throw new InvalidDataException();
+                var n1 = WheelVM.Numbers[ns[0]];
+                var n2 = WheelVM.Numbers[ns[1]];
+                var n3 = WheelVM.Numbers[ns[2]];
+                var n4 = WheelVM.Numbers[ns[3]];
+                PlaceCornerBetFunction tx = new PlaceCornerBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Number1 = n1.Id,
+                    Number2 = n2.Id,
+                    Number3 = n3.Id,
+                    Number4 = n4.Id,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class StraightUpBetViewModel : BetViewModel<string>
+    {
+        public StraightUpBetViewModel(WheelViewModel wheelVM, HomeViewModel homeVM) : base(wheelVM, homeVM)
+        {
+
+        }
+        protected override async Task DoBet()
+        {
+            try
+            {
+                if (Value == null)
+                    throw new InvalidDataException();
+                var n1 = WheelVM.Numbers[Value];
+                PlaceStraightUpBetFunction tx = new PlaceStraightUpBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    NumberId = n1.Id,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
+        }
+    }
+    public class TopLineBetViewModel : BetViewModel<Unit>
+    {
+        public TopLineBetViewModel(WheelViewModel wheelVM, HomeViewModel homeVM) : base(wheelVM, homeVM)
+        {
+
+        }
+        protected override async Task DoBet()
+        {
+            try
+            {
+                PlaceTopLineBetFunction tx = new PlaceTopLineBetFunction()
+                {
+                    FromAddress = Root.AccountNumber ?? throw new InvalidDataException(),
+                    Gas = 1500000,
+                    Amount = UnitConversion.Convert.ToWei(Amount, UnitConversion.EthUnit.Ether)
+                };
+                var data = Convert.ToHexString(tx.GetCallData()).ToLower();
+                var signedData = await Root.SignatureRequest.Handle(new TransactionData()
+                {
+                    ContractAddress = Root.ContractAddress ?? throw new InvalidDataException(),
+                    TXData = data,
+                    Gas = tx.Gas ?? throw new InvalidDataException()
+
+                }).GetAwaiter();
+                var str = await Root.W3.Eth.Transactions.SendRawTransaction.SendRequestAsync(signedData);
+            }
+            catch (Exception ex)
+            {
+                await Root.Alert.Handle(ex.Message).GetAwaiter();
+            }
         }
     }
     public class AccountViewModel : ReactiveObject

@@ -1,0 +1,24 @@
+﻿@inherits ReactiveComponentBase<ColorBetViewModel>
+
+@if (ViewModel != null)
+{
+    <TelerikDialog @bind-Visible="ViewModel.IsOpen" Title="Color Bet (1:1)">
+        <DialogContent>
+            <h2>
+                @if (ViewModel.Value == NumberColor.Red)
+                {
+                    <span>Red</span>
+                }
+                else
+                {
+                    <span>Black</span>
+                }
+            </h2>
+            <TelerikNumericTextBox @bind-Value="ViewModel.Amount" Decimals="12" />
+            <TelerikButton OnClick="ViewModel.Bet.BindCommand<MouseEventArgs>()">Bet</TelerikButton>
+        </DialogContent>
+    </TelerikDialog>
+}
+@code {
+
+}

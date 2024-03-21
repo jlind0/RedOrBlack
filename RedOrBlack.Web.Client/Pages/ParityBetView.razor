@@ -1,0 +1,24 @@
+﻿@inherits ReactiveComponentBase<ParityBetViewModel>
+
+@if (ViewModel != null)
+{
+    <TelerikDialog @bind-Visible="ViewModel.IsOpen" Title="Odd//Even Bet (1:1)">
+        <DialogContent>
+            <h2>
+                @if (ViewModel.Value == NumberParity.Even)
+                {
+                    <span>Even</span>
+                }
+                else
+                {
+                    <span>Odd</span>
+                }
+            </h2>
+            <TelerikNumericTextBox @bind-Value="ViewModel.Amount" Decimals="12" />
+            <TelerikButton OnClick="ViewModel.Bet.BindCommand<MouseEventArgs>()">Bet</TelerikButton>
+        </DialogContent>
+    </TelerikDialog>
+}
+@code {
+
+}
